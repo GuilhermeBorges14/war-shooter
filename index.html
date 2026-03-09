@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>War Shooter — 3D FPS</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="game-container">
+      <canvas id="canvas"></canvas>
+      <div id="ui">
+        <div>
+          <div id="player-name-display"></div>
+          <div class="health-container">
+            <div class="health-label" id="player-health-label">Your Health</div>
+            <div id="health-bar"><div id="health-fill"></div></div>
+          </div>
+        </div>
+        <div class="health-container">
+          <div class="health-label">Enemy Health</div>
+          <div id="bot-health-bar"><div id="bot-health-fill"></div></div>
+        </div>
+      </div>
+      <div id="crosshair"></div>
+      <div id="ammo-counter">
+        <span class="ammo-icon">🔫</span><span id="ammo-count">7</span>
+      </div>
+      <div id="no-ammo-message">NO AMMO!</div>
+      <div id="full-ammo-message">AMMO FULL!</div>
+      <div id="message"></div>
+      <button id="restart-btn">Play Again</button>
+      <div id="smg-popup">
+        <h2>🔫 SUBMACHINE GUN</h2>
+        <p>
+          <strong>This will upgrade your weapon!</strong><br />
+          • 40 bullets granted<br />
+          • Shoots 3 bullets per click<br />
+          • Ammo drops give 10 bullets<br />
+          • Enemy health restored and increased 3x<br />
+          • Enemy speed increased by 25%<br />
+          <br />
+          Accept the challenge?
+        </p>
+        <div class="buttons">
+          <button id="smg-confirm">Accept</button>
+          <button id="smg-cancel">Decline</button>
+        </div>
+      </div>
+      <canvas id="minimap" width="180" height="180"></canvas>
+      <div id="start-screen">
+        <h1>🪖 WAR SHOOTER</h1>
+        <p class="subtitle">First-Person Combat Arena</p>
+        <input
+          type="text"
+          id="player-name-input"
+          placeholder="Player"
+          value="Player"
+          maxlength="20"
+        />
+        <p>
+          <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> &nbsp; Move<br />
+          <kbd>Mouse</kbd> &nbsp; Look Around<br />
+          <kbd>Right Click</kbd> &nbsp; Shoot
+        </p>
+        <button id="start-btn">Start Game</button>
+      </div>
+    </div>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+        }
+      }
+    </script>
+    <script type="module" src="game.js"></script>
+  </body>
+</html>
