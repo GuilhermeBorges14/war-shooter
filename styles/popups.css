@@ -1,0 +1,117 @@
+/* ============================================================
+   Popups — SMG upgrade dialog, notifications
+   ============================================================ */
+
+#smg-popup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(15, 18, 20, 0.98);
+  padding: 2rem;
+  border-radius: 16px;
+  border: 2px solid rgba(220, 38, 38, 0.6);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  display: none;
+  z-index: 1000;
+  text-align: center;
+  min-width: 400px;
+}
+
+#smg-popup h2 {
+  color: #fbbf24;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+}
+
+#smg-popup p {
+  color: #f1f5f9;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+#smg-popup .buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+#smg-popup button {
+  pointer-events: auto;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  border: 2px solid;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+#smg-confirm {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  border-color: rgba(251, 191, 36, 0.6);
+  color: #000;
+}
+
+#smg-confirm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.5);
+}
+
+#smg-cancel {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  border-color: rgba(107, 114, 128, 0.6);
+  color: #fff;
+}
+
+#smg-cancel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(107, 114, 128, 0.5);
+}
+
+/* ---- Floating notifications ---- */
+
+.smg-notification {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fbbf24;
+  text-shadow: 0 0 20px rgba(251, 191, 36, 0.8), 0 4px 12px rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.85);
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  border: 2px solid rgba(251, 191, 36, 0.6);
+  pointer-events: none;
+  z-index: 999;
+  animation: fadeOut 3s forwards;
+}
+
+/* ---- Floating damage numbers ---- */
+
+.damage-number {
+  position: absolute;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fbbf24;
+  text-shadow:
+    0 0 8px rgba(220, 38, 38, 0.8),
+    0 2px 6px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  z-index: 998;
+  animation: floatUp 0.9s ease-out forwards;
+}
+
+.damage-number.critical {
+  font-size: 1.8rem;
+  color: #f87171;
+  text-shadow:
+    0 0 12px rgba(220, 38, 38, 1),
+    0 2px 6px rgba(0, 0, 0, 0.9);
+}

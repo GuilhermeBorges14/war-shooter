@@ -4,11 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>War Shooter — 3D FPS</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles/base.css" />
+    <link rel="stylesheet" href="styles/hud.css" />
+    <link rel="stylesheet" href="styles/screens.css" />
+    <link rel="stylesheet" href="styles/popups.css" />
+    <link rel="stylesheet" href="styles/animations.css" />
   </head>
   <body>
     <div id="game-container">
       <canvas id="canvas"></canvas>
+
+      <!-- HUD: health bars + player name -->
       <div id="ui">
         <div>
           <div id="player-name-display"></div>
@@ -22,14 +28,34 @@
           <div id="bot-health-bar"><div id="bot-health-fill"></div></div>
         </div>
       </div>
+
+      <!-- Kill counter (top-center) -->
+      <div id="kill-counter">
+        <span class="kill-icon">💀</span>KILLS: <span id="kill-count">0</span>
+      </div>
+
+      <!-- Crosshair -->
       <div id="crosshair"></div>
+
+      <!-- Ammo counter + reload bar (bottom-left) -->
       <div id="ammo-counter">
         <span class="ammo-icon">🔫</span><span id="ammo-count">7</span>
+        <div id="reload-bar"><div id="reload-bar-fill"></div></div>
+        <div id="reload-text">RELOADING</div>
       </div>
+
+      <!-- Ammo state messages -->
       <div id="no-ammo-message">NO AMMO!</div>
       <div id="full-ammo-message">AMMO FULL!</div>
+
+      <!-- Win/Lose message -->
       <div id="message"></div>
       <button id="restart-btn">Play Again</button>
+
+      <!-- Screen-damage vignette overlay -->
+      <div id="damage-vignette"></div>
+
+      <!-- SMG upgrade popup -->
       <div id="smg-popup">
         <h2>🔫 SUBMACHINE GUN</h2>
         <p>
@@ -37,7 +63,7 @@
           • 40 bullets granted<br />
           • Shoots 3 bullets per click<br />
           • Ammo drops give 10 bullets<br />
-          • Enemy health restored and increased 3x<br />
+          • Enemy health restored and increased 3×<br />
           • Enemy speed increased by 25%<br />
           <br />
           Accept the challenge?
@@ -47,7 +73,11 @@
           <button id="smg-cancel">Decline</button>
         </div>
       </div>
+
+      <!-- Minimap -->
       <canvas id="minimap" width="180" height="180"></canvas>
+
+      <!-- Start screen -->
       <div id="start-screen">
         <h1>🪖 WAR SHOOTER</h1>
         <p class="subtitle">First-Person Combat Arena</p>
@@ -60,12 +90,15 @@
         />
         <p>
           <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> &nbsp; Move<br />
+          <kbd>Shift</kbd> &nbsp; Sprint<br />
           <kbd>Mouse</kbd> &nbsp; Look Around<br />
-          <kbd>Right Click</kbd> &nbsp; Shoot
+          <kbd>Right Click</kbd> &nbsp; Shoot<br />
+          <kbd>R</kbd> &nbsp; Reload
         </p>
         <button id="start-btn">Start Game</button>
       </div>
     </div>
+
     <script type="importmap">
       {
         "imports": {
