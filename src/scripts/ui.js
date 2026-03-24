@@ -1,5 +1,5 @@
 import { state } from "./state.js";
-import { ARENA_SIZE } from "./constants.js";
+import { ARENA_SIZE } from "../utils/constants.js";
 
 // ============================================================
 // UI / HUD — DOM element cache and update functions
@@ -75,7 +75,7 @@ export function updateReloadBar(progress) {
   const { dom } = state;
   if (dom.reloadBar) dom.reloadBar.classList.add("show");
   if (dom.reloadText) dom.reloadText.classList.add("show");
-  if (dom.reloadBarFill) dom.reloadBarFill.style.width = (progress * 100) + "%";
+  if (dom.reloadBarFill) dom.reloadBarFill.style.width = progress * 100 + "%";
 }
 
 export function hideReloadBar() {
@@ -111,8 +111,14 @@ export function drawMinimap() {
   ctx.lineWidth = 0.5;
   const gridStep = 2 * scale;
   for (let i = gridStep; i < size; i += gridStep) {
-    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, size); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(size, i); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i, size);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, i);
+    ctx.lineTo(size, i);
+    ctx.stroke();
   }
 
   // Crates
@@ -131,26 +137,36 @@ export function drawMinimap() {
   for (const drop of state.bulletDrops) {
     const x = (drop.mesh.position.x + ARENA_SIZE / 2) * scale;
     const z = (drop.mesh.position.z + ARENA_SIZE / 2) * scale;
-    ctx.beginPath(); ctx.arc(x, z, 3, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x, z, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
   }
 
   // Bot
   const botX = (state.botGroup.position.x + ARENA_SIZE / 2) * scale;
   const botZ = (state.botGroup.position.z + ARENA_SIZE / 2) * scale;
   ctx.fillStyle = "#dc2626";
-  ctx.beginPath(); ctx.arc(botX, botZ, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath();
+  ctx.arc(botX, botZ, 5, 0, Math.PI * 2);
+  ctx.fill();
   ctx.strokeStyle = "#dc2626";
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(botX, botZ);
-  ctx.lineTo(botX - Math.sin(state.botGroup.rotation.y) * 10, botZ - Math.cos(state.botGroup.rotation.y) * 10);
+  ctx.lineTo(
+    botX - Math.sin(state.botGroup.rotation.y) * 10,
+    botZ - Math.cos(state.botGroup.rotation.y) * 10,
+  );
   ctx.stroke();
 
   // Player
   const px = (state.playerGroup.position.x + ARENA_SIZE / 2) * scale;
   const pz = (state.playerGroup.position.z + ARENA_SIZE / 2) * scale;
   ctx.fillStyle = "#48bb78";
-  ctx.beginPath(); ctx.arc(px, pz, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath();
+  ctx.arc(px, pz, 5, 0, Math.PI * 2);
+  ctx.fill();
   ctx.strokeStyle = "#48bb78";
   ctx.lineWidth = 2;
   ctx.beginPath();

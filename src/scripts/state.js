@@ -4,7 +4,7 @@ import {
   BOT_HEALTH,
   BOT_MOVE_SPEED,
   STARTING_BULLETS,
-} from "./constants.js";
+} from "../utils/constants.js";
 
 // ============================================================
 // Centralised mutable game state

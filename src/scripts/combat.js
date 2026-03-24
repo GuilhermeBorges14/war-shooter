@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { state } from "./state.js";
 import { playShootSound } from "./audio.js";
-import { BULLET_RANGE, ARENA_SIZE } from "./constants.js";
+import { BULLET_RANGE, ARENA_SIZE } from "../utils/constants.js";
 
 // ============================================================
 // Combat — bullets, hit detection, visual feedback

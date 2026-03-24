@@ -9,7 +9,7 @@ import {
   RELOAD_TIME,
   MAX_BULLETS,
   MAX_BULLETS_SMG,
-} from "./constants.js";
+} from "../utils/constants.js";
 import { updateAmmoDisplay, updateReloadBar, hideReloadBar } from "./ui.js";
 import { playReloadSound, playReloadCompleteSound } from "./audio.js";
 
@@ -49,8 +49,16 @@ export function updatePlayerMovement(dt) {
   const newX = state.playerGroup.position.x + state.playerVelocity.x * dt;
   const newZ = state.playerGroup.position.z + state.playerVelocity.z * dt;
 
-  state.playerGroup.position.x = THREE.MathUtils.clamp(newX, -ENTITY_BOUND, ENTITY_BOUND);
-  state.playerGroup.position.z = THREE.MathUtils.clamp(newZ, -ENTITY_BOUND, ENTITY_BOUND);
+  state.playerGroup.position.x = THREE.MathUtils.clamp(
+    newX,
+    -ENTITY_BOUND,
+    ENTITY_BOUND,
+  );
+  state.playerGroup.position.z = THREE.MathUtils.clamp(
+    newZ,
+    -ENTITY_BOUND,
+    ENTITY_BOUND,
+  );
 
   state.camera.position.set(
     state.playerGroup.position.x,

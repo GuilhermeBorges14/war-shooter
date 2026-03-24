@@ -11,7 +11,7 @@ import {
   SMG_COLLECT_DIST,
   PICKUP_COLLECT_DIST,
   DROP_RESPAWN_DELAY,
-} from "./constants.js";
+} from "../utils/constants.js";
 
 // ============================================================
 // Pickup system — bullet drops, SMG pickup
@@ -33,22 +33,33 @@ export function createBulletDrop(x, z) {
     metalness: 0.7,
     roughness: 0.4,
   });
-  const topBand = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.04, 0.37), bandMat);
+  const topBand = new THREE.Mesh(
+    new THREE.BoxGeometry(0.52, 0.04, 0.37),
+    bandMat,
+  );
   topBand.position.y = 0.12;
   dropGroup.add(topBand);
 
-  const bottomBand = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.04, 0.37), bandMat);
+  const bottomBand = new THREE.Mesh(
+    new THREE.BoxGeometry(0.52, 0.04, 0.37),
+    bandMat,
+  );
   bottomBand.position.y = -0.12;
   dropGroup.add(bottomBand);
 
-  dropGroup.add(new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.37, 0.37), bandMat));
+  dropGroup.add(
+    new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.37, 0.37), bandMat),
+  );
 
   const labelMat = new THREE.MeshStandardMaterial({
     color: 0xf5f5dc,
     emissive: 0xf5f5dc,
     emissiveIntensity: 0.3,
   });
-  const label = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.02), labelMat);
+  const label = new THREE.Mesh(
+    new THREE.BoxGeometry(0.15, 0.15, 0.02),
+    labelMat,
+  );
   label.position.set(0, 0, 0.18);
   dropGroup.add(label);
 
@@ -57,7 +68,9 @@ export function createBulletDrop(x, z) {
     transparent: true,
     opacity: 0.15,
   });
-  dropGroup.add(new THREE.Mesh(new THREE.SphereGeometry(0.35, 16, 16), glowMat));
+  dropGroup.add(
+    new THREE.Mesh(new THREE.SphereGeometry(0.35, 16, 16), glowMat),
+  );
 
   dropGroup.position.set(x, 0.4, z);
   state.scene.add(dropGroup);
@@ -107,8 +120,16 @@ export function updatePickups(dt) {
 
   // Check SMG proximity
   if (smgPickup && smgPickup.visible && !smgPopupShown) {
-    const playerPos2D = new THREE.Vector3(state.playerGroup.position.x, 0, state.playerGroup.position.z);
-    const smgPos = new THREE.Vector3(smgPickup.position.x, 0, smgPickup.position.z);
+    const playerPos2D = new THREE.Vector3(
+      state.playerGroup.position.x,
+      0,
+      state.playerGroup.position.z,
+    );
+    const smgPos = new THREE.Vector3(
+      smgPickup.position.x,
+      0,
+      smgPickup.position.z,
+    );
     if (smgPos.distanceTo(playerPos2D) < SMG_COLLECT_DIST) {
       state.smgPopupShown = true;
       state.dom.smgPopup.style.display = "block";
@@ -126,7 +147,11 @@ export function updatePickups(dt) {
     const dropPos = new THREE.Vector3();
     drop.mesh.getWorldPosition(dropPos);
     dropPos.y = 0;
-    const playerPos = new THREE.Vector3(state.playerGroup.position.x, 0, state.playerGroup.position.z);
+    const playerPos = new THREE.Vector3(
+      state.playerGroup.position.x,
+      0,
+      state.playerGroup.position.z,
+    );
 
     if (dropPos.distanceTo(playerPos) < PICKUP_COLLECT_DIST) {
       const currentMax = state.hasSMG ? MAX_BULLETS_SMG : MAX_BULLETS;

@@ -15,8 +15,13 @@ import {
 } from "./combat.js";
 import { endGame } from "./lifecycle.js";
 import { playHitSound, playPainSound } from "./audio.js";
-import { updateBotHealthDisplay, drawMinimap, showDamageVignette, updateKillCounter } from "./ui.js";
-import { DAMAGE, PLAYER_HEALTH, SMG_SPAWN_DELAY } from "./constants.js";
+import {
+  updateBotHealthDisplay,
+  drawMinimap,
+  showDamageVignette,
+  updateKillCounter,
+} from "./ui.js";
+import { DAMAGE, PLAYER_HEALTH, SMG_SPAWN_DELAY } from "../utils/constants.js";
 
 // ============================================================
 // Main game loop
@@ -46,7 +51,11 @@ function tick() {
   updateScreenShake(dt);
 
   // Spawn SMG after delay
-  if (!state.smgSpawned && !state.hasSMG && Date.now() - state.gameStartTime >= SMG_SPAWN_DELAY) {
+  if (
+    !state.smgSpawned &&
+    !state.hasSMG &&
+    Date.now() - state.gameStartTime >= SMG_SPAWN_DELAY
+  ) {
     spawnSMGPickup();
   }
 

@@ -1,14 +1,18 @@
 import { state } from "./state.js";
 import { createGun, createSMG } from "./entities.js";
 import { spawnBulletDrops } from "./pickups.js";
-import { updateAmmoDisplay, updateBotHealthDisplay, updateKillCounter } from "./ui.js";
+import {
+  updateAmmoDisplay,
+  updateBotHealthDisplay,
+  updateKillCounter,
+} from "./ui.js";
 import {
   PLAYER_HEALTH,
   BOT_HEALTH,
   BOT_MOVE_SPEED,
   MAX_BULLETS_SMG,
   STARTING_BULLETS,
-} from "./constants.js";
+} from "../utils/constants.js";
 
 // ============================================================
 // Game lifecycle — start, restart, win/lose, SMG choice
@@ -100,7 +104,8 @@ export function handleStartGame() {
   localStorage.setItem("playerName", playerName);
 
   if (dom.playerNameDisplay) dom.playerNameDisplay.textContent = playerName;
-  if (dom.playerHealthLabel) dom.playerHealthLabel.textContent = playerName + "'s Health";
+  if (dom.playerHealthLabel)
+    dom.playerHealthLabel.textContent = playerName + "'s Health";
   if (dom.startScreen) dom.startScreen.style.display = "none";
 
   state.gameStarted = true;

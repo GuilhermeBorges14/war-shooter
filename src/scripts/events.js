@@ -14,7 +14,7 @@ import {
   BULLET_SPEED,
   MOUSE_SENSITIVITY,
   MAX_PITCH,
-} from "./constants.js";
+} from "../utils/constants.js";
 
 // ============================================================
 // Event handlers
@@ -65,7 +65,8 @@ export function handleKeyDown(e) {
   if (
     (dom.startScreen && dom.startScreen.style.display !== "none") ||
     document.activeElement === dom.nameInput
-  ) return;
+  )
+    return;
 
   state.keys[e.code] = true;
   if (e.code === "Space") e.preventDefault();
@@ -81,7 +82,8 @@ export function handleKeyUp(e) {
   if (
     (dom.startScreen && dom.startScreen.style.display !== "none") ||
     document.activeElement === dom.nameInput
-  ) return;
+  )
+    return;
 
   state.keys[e.code] = false;
 }
@@ -101,7 +103,8 @@ export function handleResize() {
 }
 
 export function handlePointerLockChange() {
-  state.pointerLocked = document.pointerLockElement === state.renderer.domElement;
+  state.pointerLocked =
+    document.pointerLockElement === state.renderer.domElement;
 }
 
 export function setupEventListeners() {
@@ -121,7 +124,9 @@ export function setupEventListeners() {
   dom.smgConfirm.onclick = handleSMGConfirm;
   dom.smgCancel.onclick = handleSMGCancel;
 
-  renderer.domElement.addEventListener("contextmenu", (e) => e.preventDefault());
+  renderer.domElement.addEventListener("contextmenu", (e) =>
+    e.preventDefault(),
+  );
   renderer.domElement.addEventListener("mousedown", handleMouseDown);
   document.addEventListener("pointerlockchange", handlePointerLockChange);
   document.addEventListener("keydown", handleKeyDown);

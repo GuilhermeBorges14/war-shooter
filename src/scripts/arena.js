@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { state } from "./state.js";
-import { ARENA_SIZE, WALL_HEIGHT } from "./constants.js";
+import { ARENA_SIZE, WALL_HEIGHT } from "../utils/constants.js";
 
 // ============================================================
 // Arena — floor, walls, pillars, crates, lighting
@@ -23,19 +23,30 @@ export function createArena() {
   scene.add(floor);
 
   // Floor grid lines
-  const gridMat = new THREE.LineBasicMaterial({ color: 0xccccdd, linewidth: 1 });
+  const gridMat = new THREE.LineBasicMaterial({
+    color: 0xccccdd,
+    linewidth: 1,
+  });
   const gridStep = 2;
   const gridPoints = [];
   for (let x = -half; x <= half; x += gridStep) {
-    gridPoints.push(new THREE.Vector3(x, 0.01, -half), new THREE.Vector3(x, 0.01, half));
+    gridPoints.push(
+      new THREE.Vector3(x, 0.01, -half),
+      new THREE.Vector3(x, 0.01, half),
+    );
   }
   for (let z = -half; z <= half; z += gridStep) {
-    gridPoints.push(new THREE.Vector3(-half, 0.01, z), new THREE.Vector3(half, 0.01, z));
+    gridPoints.push(
+      new THREE.Vector3(-half, 0.01, z),
+      new THREE.Vector3(half, 0.01, z),
+    );
   }
-  scene.add(new THREE.LineSegments(
-    new THREE.BufferGeometry().setFromPoints(gridPoints),
-    gridMat,
-  ));
+  scene.add(
+    new THREE.LineSegments(
+      new THREE.BufferGeometry().setFromPoints(gridPoints),
+      gridMat,
+    ),
+  );
 
   // Walls
   const wallMat = new THREE.MeshStandardMaterial({
@@ -53,9 +64,9 @@ export function createArena() {
   const wallGeo = new THREE.BoxGeometry(ARENA_SIZE + 1, WALL_HEIGHT, 1);
   const wallConfigs = [
     { pos: [0, 0, -half], rot: 0 },
-    { pos: [0, 0, half],  rot: 0 },
+    { pos: [0, 0, half], rot: 0 },
     { pos: [-half, 0, 0], rot: Math.PI / 2 },
-    { pos: [half, 0, 0],  rot: Math.PI / 2 },
+    { pos: [half, 0, 0], rot: Math.PI / 2 },
   ];
   wallConfigs.forEach(({ pos, rot }) => {
     const wall = new THREE.Mesh(wallGeo, wallMat);
@@ -81,7 +92,12 @@ export function createArena() {
     metalness: 0.3,
   });
   const pillarGeo = new THREE.CylinderGeometry(0.5, 0.6, WALL_HEIGHT, 8);
-  [[-half, half], [half, half], [half, -half], [-half, -half]].forEach(([x, z]) => {
+  [
+    [-half, half],
+    [half, half],
+    [half, -half],
+    [-half, -half],
+  ].forEach(([x, z]) => {
     const pillar = new THREE.Mesh(pillarGeo, pillarMat);
     pillar.position.set(x, WALL_HEIGHT / 2, z);
     pillar.castShadow = true;

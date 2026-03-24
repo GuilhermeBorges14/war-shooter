@@ -8,7 +8,7 @@ import {
   BOT_SHOOT_INTERVAL,
   ENTITY_BOUND,
   BOT_BULLET_SPEED,
-} from "./constants.js";
+} from "../utils/constants.js";
 
 // ============================================================
 // Bot AI — targeting, movement, shooting
@@ -32,20 +32,42 @@ export function updateBotAI(dt) {
     botGroup.rotation.y += Math.sign(diff) * Math.min(Math.abs(diff), 3 * dt);
 
     if (dist > BOT_FAR_DIST) {
-      botGroup.position.x += Math.sin(botGroup.rotation.y) * -state.botMoveSpeed * dt;
-      botGroup.position.z += Math.cos(botGroup.rotation.y) * -state.botMoveSpeed * dt;
+      botGroup.position.x +=
+        Math.sin(botGroup.rotation.y) * -state.botMoveSpeed * dt;
+      botGroup.position.z +=
+        Math.cos(botGroup.rotation.y) * -state.botMoveSpeed * dt;
     } else if (dist > BOT_MED_DIST) {
-      botGroup.position.x += Math.sin(botGroup.rotation.y) * -state.botMoveSpeed * 0.6 * dt;
-      botGroup.position.z += Math.cos(botGroup.rotation.y) * -state.botMoveSpeed * 0.6 * dt;
+      botGroup.position.x +=
+        Math.sin(botGroup.rotation.y) * -state.botMoveSpeed * 0.6 * dt;
+      botGroup.position.z +=
+        Math.cos(botGroup.rotation.y) * -state.botMoveSpeed * 0.6 * dt;
     } else {
       const strafeAngle = botGroup.rotation.y + Math.PI / 2;
       const strafeDir = Math.sin(Date.now() * 0.001) > 0 ? 1 : -1;
-      botGroup.position.x += Math.sin(strafeAngle) * state.botMoveSpeed * BOT_STRAFE_MULT * strafeDir * dt;
-      botGroup.position.z += Math.cos(strafeAngle) * state.botMoveSpeed * BOT_STRAFE_MULT * strafeDir * dt;
+      botGroup.position.x +=
+        Math.sin(strafeAngle) *
+        state.botMoveSpeed *
+        BOT_STRAFE_MULT *
+        strafeDir *
+        dt;
+      botGroup.position.z +=
+        Math.cos(strafeAngle) *
+        state.botMoveSpeed *
+        BOT_STRAFE_MULT *
+        strafeDir *
+        dt;
     }
 
-    botGroup.position.x = THREE.MathUtils.clamp(botGroup.position.x, -ENTITY_BOUND, ENTITY_BOUND);
-    botGroup.position.z = THREE.MathUtils.clamp(botGroup.position.z, -ENTITY_BOUND, ENTITY_BOUND);
+    botGroup.position.x = THREE.MathUtils.clamp(
+      botGroup.position.x,
+      -ENTITY_BOUND,
+      ENTITY_BOUND,
+    );
+    botGroup.position.z = THREE.MathUtils.clamp(
+      botGroup.position.z,
+      -ENTITY_BOUND,
+      ENTITY_BOUND,
+    );
   }
 
   state.botShootTimer += dt * 1000;
@@ -55,14 +77,18 @@ export function updateBotAI(dt) {
     const botPos = new THREE.Vector3();
     if (state.botGunRef) {
       state.botGunRef.getWorldPosition(botPos);
-      state._scratchVec.set(0, 0, -1).applyAxisAngle(state._yAxis, botGroup.rotation.y);
+      state._scratchVec
+        .set(0, 0, -1)
+        .applyAxisAngle(state._yAxis, botGroup.rotation.y);
       botPos.add(state._scratchVec.multiplyScalar(0.3));
     } else {
       botGroup.getWorldPosition(botPos);
       botPos.y += 1;
     }
 
-    state._scratchVec.set(0, 0, -1).applyAxisAngle(state._yAxis, botGroup.rotation.y);
+    state._scratchVec
+      .set(0, 0, -1)
+      .applyAxisAngle(state._yAxis, botGroup.rotation.y);
     shoot(botPos, state._scratchVec, false, BOT_BULLET_SPEED);
   }
 }
