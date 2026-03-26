@@ -1,4 +1,4 @@
-import * as THREE from "three";
+const BABYLON = window.BABYLON;
 import { state } from "./state.js";
 import { playShootSound } from "./audio.js";
 import { BULLET_RANGE, ARENA_SIZE } from "../utils/constants.js";
@@ -7,77 +7,104 @@ import { BULLET_RANGE, ARENA_SIZE } from "../utils/constants.js";
 // Combat — bullets, hit detection, visual feedback
 // ============================================================
 
+// Reusable viewport for screen projection
+const _viewport = new BABYLON.Viewport(0, 0, 1, 1);
+
 export function shoot(fromPosition, direction, isPlayerBullet, bulletSpeed) {
   playShootSound();
 
-  const bulletGroup = new THREE.Group();
-
-  const geo = new THREE.CapsuleGeometry(0.03, 0.15, 4, 8);
-  const mat = new THREE.MeshStandardMaterial({
-    color: isPlayerBullet ? 0x44ff44 : 0xff4444,
-    emissive: isPlayerBullet ? 0x22ff22 : 0xff2222,
-    emissiveIntensity: 0.6,
-  });
-  bulletGroup.add(new THREE.Mesh(geo, mat));
-
-  const glowGeo = new THREE.SphereGeometry(0.08, 8, 8);
-  const glowMat = new THREE.MeshBasicMaterial({
-    color: isPlayerBullet ? 0x44ff44 : 0xff4444,
-    transparent: true,
-    opacity: 0.4,
-  });
-  bulletGroup.add(new THREE.Mesh(glowGeo, glowMat));
-
-  bulletGroup.position.copy(fromPosition);
   const dir = direction.clone().normalize();
+  const color = isPlayerBullet ? new BABYLON.Color3(0.267, 1.0, 0.267) : new BABYLON.Color3(1.0, 0.267, 0.267);
 
-  bulletGroup.quaternion.copy(
-    new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir),
+  // Capsule body
+  const bulletMesh = BABYLON.MeshBuilder.CreateCapsule(
+    "bullet",
+    { radius: 0.03, height: 0.18, tessellation: 4, subdivisions: 2 },
+    state.scene,
   );
+  const bulletMat = new BABYLON.StandardMaterial("bulletMat", state.scene);
+  bulletMat.diffuseColor = color;
+  bulletMat.emissiveColor = color;
+  bulletMesh.material = bulletMat;
+  bulletMesh.position.copyFrom(fromPosition);
+
+  // Orient capsule along travel direction
+  _orientAlongDir(bulletMesh, dir);
+
+  // Glow sphere (child of capsule — disposed together)
+  const glowMesh = BABYLON.MeshBuilder.CreateSphere(
+    "bulletGlow",
+    { diameter: 0.16, segments: 6 },
+    state.scene,
+  );
+  const glowMat = new BABYLON.StandardMaterial("glowMat", state.scene);
+  glowMat.diffuseColor = color;
+  glowMat.alpha = 0.4;
+  glowMesh.material = glowMat;
+  glowMesh.parent = bulletMesh;
 
   const data = {
-    mesh: bulletGroup,
-    velocity: dir.multiplyScalar(bulletSpeed),
+    mesh: bulletMesh,
+    velocity: dir.scale(bulletSpeed),
     isPlayer: isPlayerBullet,
     life: BULLET_RANGE / bulletSpeed,
   };
-  state.scene.add(bulletGroup);
+
   if (isPlayerBullet) state.bullets.push(data);
   else state.botBullets.push(data);
 }
 
+// Orient a mesh so its local +Y axis points along dir
+function _orientAlongDir(mesh, dir) {
+  const yaw = Math.atan2(dir.x, dir.z);
+  const pitch = -Math.asin(BABYLON.Scalar.Clamp(dir.y, -1, 1));
+  mesh.rotation.set(pitch, yaw, 0);
+}
+
+// AABB point-in-box test (Babylon.js replaces Box3.containsPoint)
+function _aabbContains(bounds, p) {
+  return (
+    p.x >= bounds.min.x && p.x <= bounds.max.x &&
+    p.y >= bounds.min.y && p.y <= bounds.max.y &&
+    p.z >= bounds.min.z && p.z <= bounds.max.z
+  );
+}
+
 export function updateBulletList(list, targetGroup, hitRadius, onHit, dt) {
   const wallBound = ARENA_SIZE / 2 - 0.5;
+
+  // Target hit-centre: absolute position + 1 unit up
+  const absPos = targetGroup.getAbsolutePosition();
+  const targetCenter = new BABYLON.Vector3(absPos.x, absPos.y + 1, absPos.z);
+
   for (let i = list.length - 1; i >= 0; i--) {
     const b = list[i];
-    b.mesh.position.add(state._scratchVec.copy(b.velocity).multiplyScalar(dt));
-    b.mesh.quaternion.copy(
-      state._scratchQuat.setFromUnitVectors(
-        state._yAxis,
-        state._scratchVec.copy(b.velocity).normalize(),
-      ),
-    );
+
+    // Inline math — avoids a Vector3 allocation per bullet per frame
+    b.mesh.position.x += b.velocity.x * dt;
+    b.mesh.position.y += b.velocity.y * dt;
+    b.mesh.position.z += b.velocity.z * dt;
+    _orientAlongDir(b.mesh, b.velocity);
     b.life -= dt;
 
-    if (
-      Math.abs(b.mesh.position.x) > wallBound ||
-      Math.abs(b.mesh.position.z) > wallBound
-    ) {
-      state.scene.remove(b.mesh);
+    const p = b.mesh.position;
+
+    if (Math.abs(p.x) > wallBound || Math.abs(p.z) > wallBound) {
+      b.mesh.dispose();
       list.splice(i, 1);
       continue;
     }
 
     if (b.life <= 0) {
-      state.scene.remove(b.mesh);
+      b.mesh.dispose();
       list.splice(i, 1);
       continue;
     }
 
     let hitCrate = false;
     for (let c = 0; c < state.crateBounds.length; c++) {
-      if (state.crateBounds[c].containsPoint(b.mesh.position)) {
-        state.scene.remove(b.mesh);
+      if (_aabbContains(state.crateBounds[c], p)) {
+        b.mesh.dispose();
         list.splice(i, 1);
         hitCrate = true;
         break;
@@ -85,27 +112,27 @@ export function updateBulletList(list, targetGroup, hitRadius, onHit, dt) {
     }
     if (hitCrate) continue;
 
-    state._scratchVec.set(0, 1, 0).applyMatrix4(targetGroup.matrixWorld);
-    if (b.mesh.position.distanceTo(state._scratchVec) < hitRadius) {
-      state.scene.remove(b.mesh);
+    if (BABYLON.Vector3.Distance(p, targetCenter) < hitRadius) {
+      b.mesh.dispose();
       list.splice(i, 1);
-      onHit(state._scratchVec.clone());
+      onHit(targetCenter.clone());
     }
   }
 }
 
 export function showHitmarker(worldPosition) {
-  const vector = worldPosition.clone();
-  vector.project(state.camera);
-
-  const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
-  const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+  const screenPos = BABYLON.Vector3.Project(
+    worldPosition,
+    BABYLON.Matrix.Identity(),
+    state.scene.getTransformMatrix(),
+    _viewport.toGlobal(window.innerWidth, window.innerHeight),
+  );
 
   const hitmarker = document.createElement("div");
   hitmarker.style.cssText = `
     position: absolute;
-    left: ${x}px;
-    top: ${y}px;
+    left: ${screenPos.x}px;
+    top: ${screenPos.y}px;
     transform: translate(-50%, -50%);
     width: 40px;
     height: 40px;
@@ -129,17 +156,18 @@ export function showHitmarker(worldPosition) {
 }
 
 export function showDamageNumber(worldPosition, amount) {
-  const vector = worldPosition.clone();
-  vector.project(state.camera);
-
-  const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
-  const y = (-vector.y * 0.5 + 0.5) * window.innerHeight;
+  const screenPos = BABYLON.Vector3.Project(
+    worldPosition,
+    BABYLON.Matrix.Identity(),
+    state.scene.getTransformMatrix(),
+    _viewport.toGlobal(window.innerWidth, window.innerHeight),
+  );
 
   const el = document.createElement("div");
   el.className = "damage-number";
   el.textContent = `-${amount}`;
-  el.style.left = `${x + (Math.random() - 0.5) * 30}px`;
-  el.style.top = `${y - 20}px`;
+  el.style.left = `${screenPos.x + (Math.random() - 0.5) * 30}px`;
+  el.style.top = `${screenPos.y - 20}px`;
   document.body.appendChild(el);
   setTimeout(() => el.parentNode?.removeChild(el), 900);
 }
@@ -147,7 +175,7 @@ export function showDamageNumber(worldPosition, amount) {
 export function flashBotHit() {
   if (!state.botBodyMaterials) return;
   state.botBodyMaterials.forEach(({ mat, origColor }) => {
-    mat.color.set(0xff4444);
-    setTimeout(() => mat.color.copy(origColor), 80);
+    mat.diffuseColor.set(1, 0.267, 0.267); // 0xff4444
+    setTimeout(() => mat.diffuseColor.copyFrom(origColor), 80);
   });
 }

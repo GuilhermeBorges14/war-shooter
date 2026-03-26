@@ -28,19 +28,16 @@ import { DAMAGE, PLAYER_HEALTH, SMG_SPAWN_DELAY } from "../utils/constants.js";
 // ============================================================
 
 export function startLoop() {
-  state.renderer.setAnimationLoop(tick);
+  state.engine.runRenderLoop(tick);
 }
 
 function tick() {
+  // getDeltaTime() returns milliseconds
+  let dt = state.engine.getDeltaTime() / 1000;
+  if (dt > 0.1) dt = 0.016; // clamp: prevent spiral of death on tab-out
 
-  let dt = state.clock.getDelta();
-  if (dt > 0.1) dt = 0.016; // clamp to avoid spiral of death on tab-out
-
-  // Always render (start screen needs background)
   if (!state.gameStarted || state.gameOver) {
-    state.renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
-    state.renderer.setScissorTest(false);
-    state.renderer.render(state.scene, state.camera);
+    state.scene.render();
     return;
   }
 
@@ -99,9 +96,6 @@ function tick() {
     dt,
   );
 
-  state.renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
-  state.renderer.setScissorTest(false);
-  state.renderer.render(state.scene, state.camera);
-
+  state.scene.render();
   drawMinimap();
 }

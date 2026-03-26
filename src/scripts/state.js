@@ -1,4 +1,4 @@
-import * as THREE from "three";
+const BABYLON = window.BABYLON;
 import {
   PLAYER_HEALTH,
   BOT_HEALTH,
@@ -11,12 +11,12 @@ import {
 // All modules import and mutate this single object.
 // ============================================================
 export const state = {
-  // Three.js core
+  // Babylon.js core
+  engine: null,
   scene: null,
   camera: null,
-  renderer: null,
 
-  // Entities
+  // Entities (TransformNode groups + body mesh refs)
   playerGroup: null,
   botGroup: null,
   playerMesh: null,
@@ -31,16 +31,16 @@ export const state = {
   playerBullets: STARTING_BULLETS,
   bullets: [],
   botBullets: [],
-  crates: [],
-  bulletDrops: [],
-  crateBounds: [],
+  crates: [],        // Babylon.js Mesh array
+  bulletDrops: [],   // Array of {mesh: TransformNode, spawnTime}
+  crateBounds: [],   // Array of {min: Vector3, max: Vector3} AABB
   keys: {},
   pointerLocked: false,
   gameStarted: false,
   gameOver: false,
   botShootTimer: 0,
   botTargetAngle: 0,
-  playerVelocity: new THREE.Vector3(),
+  playerVelocity: new BABYLON.Vector3(),
   fullAmmoMessageTime: 0,
   hasSMG: false,
   smgPickup: null,
@@ -50,7 +50,6 @@ export const state = {
   botMoveSpeed: BOT_MOVE_SPEED,
   yaw: 0,
   pitch: 0,
-  clock: new THREE.Clock(),
 
   // New feature state
   isSprinting: false,
@@ -63,9 +62,9 @@ export const state = {
   dom: {},
 
   // Scratch objects — reused each frame to reduce GC pressure
-  _yAxis: new THREE.Vector3(0, 1, 0),
-  _zeroVec: new THREE.Vector3(),
-  _inputVec: new THREE.Vector3(),
-  _scratchVec: new THREE.Vector3(),
-  _scratchQuat: new THREE.Quaternion(),
+  _yAxis: new BABYLON.Vector3(0, 1, 0),
+  _zeroVec: new BABYLON.Vector3(),
+  _inputVec: new BABYLON.Vector3(),
+  _scratchVec: new BABYLON.Vector3(),
+  _scratchQuat: new BABYLON.Quaternion(),
 };

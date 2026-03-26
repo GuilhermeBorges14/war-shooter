@@ -1,4 +1,4 @@
-import * as THREE from "three";
+const BABYLON = window.BABYLON;
 import { state } from "./state.js";
 import {
   MOVE_SPEED,
@@ -17,14 +17,15 @@ import { playReloadSound, playReloadCompleteSound } from "./audio.js";
 // Player — movement, sprinting, weapon sway, screen shake
 // ============================================================
 
-// Base gun positions (restored after sway)
-const GUN_BASE_POS = { x: 0.25, y: -0.25, z: -0.4 };
+const GUN_BASE_POS = { x: 0.25, y: -0.25, z: 0.4 };
+
+// Reused rotation matrix to avoid per-frame allocations
+const _rotMat = BABYLON.Matrix.Identity();
 
 export function updatePlayerMovement(dt) {
   const isSprinting = state.keys["ShiftLeft"] || state.keys["ShiftRight"];
   state.isSprinting = isSprinting;
 
-  // Update sprint crosshair indicator
   if (state.dom.crosshair) {
     if (isSprinting) state.dom.crosshair.classList.add("sprinting");
     else state.dom.crosshair.classList.remove("sprinting");
@@ -33,45 +34,51 @@ export function updatePlayerMovement(dt) {
   const speed = isSprinting ? MOVE_SPEED * SPRINT_MULTIPLIER : MOVE_SPEED;
 
   state._inputVec.set(0, 0, 0);
-  if (state.keys["KeyW"] || state.keys["ArrowUp"]) state._inputVec.z -= 1;
-  if (state.keys["KeyS"] || state.keys["ArrowDown"]) state._inputVec.z += 1;
+  // Babylon.js: camera looks along +Z, so W = forward = +Z
+  if (state.keys["KeyW"] || state.keys["ArrowUp"]) state._inputVec.z += 1;
+  if (state.keys["KeyS"] || state.keys["ArrowDown"]) state._inputVec.z -= 1;
   if (state.keys["KeyA"] || state.keys["ArrowLeft"]) state._inputVec.x -= 1;
   if (state.keys["KeyD"] || state.keys["ArrowRight"]) state._inputVec.x += 1;
 
   if (state._inputVec.length() > 0) {
-    state._inputVec.normalize().multiplyScalar(speed);
-    state._inputVec.applyAxisAngle(state._yAxis, state.yaw);
-    state.playerVelocity.lerp(state._inputVec, MOVE_SMOOTH * dt);
+    state._inputVec.normalize().scaleInPlace(speed);
+    // Rotate input direction by yaw — negate to match camera.rotation.y = -yaw
+    BABYLON.Matrix.RotationYToRef(-state.yaw, _rotMat);
+    BABYLON.Vector3.TransformNormalToRef(state._inputVec, _rotMat, state._inputVec);
+    BABYLON.Vector3.LerpToRef(
+      state.playerVelocity,
+      state._inputVec,
+      MOVE_SMOOTH * dt,
+      state.playerVelocity,
+    );
   } else {
-    state.playerVelocity.lerp(state._zeroVec, MOVE_SMOOTH * dt);
+    BABYLON.Vector3.LerpToRef(
+      state.playerVelocity,
+      state._zeroVec,
+      MOVE_SMOOTH * dt,
+      state.playerVelocity,
+    );
   }
 
   const newX = state.playerGroup.position.x + state.playerVelocity.x * dt;
   const newZ = state.playerGroup.position.z + state.playerVelocity.z * dt;
 
-  state.playerGroup.position.x = THREE.MathUtils.clamp(
-    newX,
-    -ENTITY_BOUND,
-    ENTITY_BOUND,
-  );
-  state.playerGroup.position.z = THREE.MathUtils.clamp(
-    newZ,
-    -ENTITY_BOUND,
-    ENTITY_BOUND,
-  );
+  state.playerGroup.position.x = BABYLON.Scalar.Clamp(newX, -ENTITY_BOUND, ENTITY_BOUND);
+  state.playerGroup.position.z = BABYLON.Scalar.Clamp(newZ, -ENTITY_BOUND, ENTITY_BOUND);
 
+  // Position camera at player's eye level
   state.camera.position.set(
     state.playerGroup.position.x,
     EYE_HEIGHT,
     state.playerGroup.position.z,
   );
-  state.camera.rotation.order = "YXZ";
-  state.camera.rotation.y = state.yaw;
-  state.camera.rotation.x = state.pitch;
+
+  // Babylon.js camera looks along +Z; negate yaw/pitch to match Three.js mouse feel
+  state.camera.rotation.y = -state.yaw;
+  state.camera.rotation.x = -state.pitch;
   state.camera.rotation.z = 0;
 }
 
-// Weapon bob and sway based on movement velocity
 export function updateWeaponSway(dt) {
   if (!state.playerGun) return;
 
@@ -88,7 +95,6 @@ export function updateWeaponSway(dt) {
   state.playerGun.position.y += (targetY - state.playerGun.position.y) * 8 * dt;
 }
 
-// Brief random camera offset when hit
 export function updateScreenShake(dt) {
   if (state.screenShake <= 0) return;
 
@@ -101,7 +107,6 @@ export function updateScreenShake(dt) {
   if (state.screenShake < 0.01) state.screenShake = 0;
 }
 
-// Reload system
 export function startReload() {
   if (state.isReloading) return;
   const maxAmmo = state.hasSMG ? MAX_BULLETS_SMG : MAX_BULLETS;

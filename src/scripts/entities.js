@@ -1,76 +1,78 @@
-import * as THREE from "three";
+const BABYLON = window.BABYLON;
 import { state } from "./state.js";
+import { c3 } from "../utils/colors.js";
 
 // ============================================================
-// Shared geometry — created once, reused by all humanoids
+// Entity factories — humanoids, weapons
 // ============================================================
-const _humanBodyGeo = new THREE.BoxGeometry(0.7, 1.0, 0.4);
-const _humanHeadGeo = new THREE.BoxGeometry(0.4, 0.4, 0.4);
-const _humanArmGeo = new THREE.BoxGeometry(0.2, 0.8, 0.2);
-const _humanLegGeo = new THREE.BoxGeometry(0.25, 0.8, 0.25);
 
-// ============================================================
-// Entity factories
-// ============================================================
+// Helper: create a StandardMaterial
+function stdMat(name, diffuseHex, opts = {}) {
+  const m = new BABYLON.StandardMaterial(name, state.scene);
+  m.diffuseColor = c3(diffuseHex);
+  m.specularColor = new BABYLON.Color3(
+    opts.spec ?? 0.1,
+    opts.spec ?? 0.1,
+    opts.spec ?? 0.1,
+  );
+  m.specularPower = opts.specPow ?? 32;
+  if (opts.emissiveHex !== undefined) {
+    m.emissiveColor = c3(opts.emissiveHex);
+  }
+  return m;
+}
+
+// Helper: box mesh parented to a node
+function box(name, w, h, d, parent) {
+  const m = BABYLON.MeshBuilder.CreateBox(name, { width: w, height: h, depth: d }, state.scene);
+  if (parent) m.parent = parent;
+  return m;
+}
+
+// ── Humanoid factory ──────────────────────────────────────
 
 export function createHumanoid({ bodyColor, headColor, legColor }) {
-  const group = new THREE.Group();
+  const group = new BABYLON.TransformNode("humanoid", state.scene);
 
-  const bodyMat = new THREE.MeshStandardMaterial({
-    color: bodyColor,
-    roughness: 0.7,
-    metalness: 0.2,
-  });
-  const body = new THREE.Mesh(_humanBodyGeo, bodyMat);
+  const bodyMat = stdMat("bodyMat", bodyColor, { spec: 0.2, specPow: 16 });
+  const body = box("body", 0.7, 1.0, 0.4, group);
   body.position.y = 1.0;
-  body.castShadow = true;
-  body.receiveShadow = true;
-  group.add(body);
+  body.material = bodyMat;
+  body.receiveShadows = true;
+  state.shadowGen.addShadowCaster(body);
 
-  const headMat = new THREE.MeshStandardMaterial({
-    color: headColor,
-    roughness: 0.8,
-    metalness: 0.1,
-  });
-  const head = new THREE.Mesh(_humanHeadGeo, headMat);
+  const headMat = stdMat("headMat", headColor, { spec: 0.1, specPow: 8 });
+  const head = box("head", 0.4, 0.4, 0.4, group);
   head.position.y = 1.7;
-  head.castShadow = true;
-  group.add(head);
+  head.material = headMat;
+  state.shadowGen.addShadowCaster(head);
 
-  const armMat = new THREE.MeshStandardMaterial({
-    color: bodyColor,
-    roughness: 0.7,
-    metalness: 0.2,
-  });
-
-  const armL = new THREE.Mesh(_humanArmGeo, armMat);
+  const armMat = stdMat("armMat", bodyColor, { spec: 0.2, specPow: 16 });
+  const armL = box("armL", 0.2, 0.8, 0.2, group);
   armL.position.set(-0.5, 0.9, 0);
-  armL.castShadow = true;
-  group.add(armL);
+  armL.material = armMat;
+  state.shadowGen.addShadowCaster(armL);
 
-  const armR = new THREE.Mesh(_humanArmGeo, armMat);
+  const armR = box("armR", 0.2, 0.8, 0.2, group);
   armR.position.set(0.5, 0.9, 0);
-  armR.castShadow = true;
-  group.add(armR);
+  armR.material = armMat;
+  state.shadowGen.addShadowCaster(armR);
 
-  const legMat = new THREE.MeshStandardMaterial({
-    color: legColor,
-    roughness: 0.8,
-    metalness: 0.15,
-  });
-
-  const legL = new THREE.Mesh(_humanLegGeo, legMat);
+  const legMat = stdMat("legMat", legColor, { spec: 0.15, specPow: 8 });
+  const legL = box("legL", 0.25, 0.8, 0.25, group);
   legL.position.set(-0.2, 0.4, 0);
-  legL.castShadow = true;
-  group.add(legL);
+  legL.material = legMat;
+  state.shadowGen.addShadowCaster(legL);
 
-  const legR = new THREE.Mesh(_humanLegGeo, legMat);
+  const legR = box("legR", 0.25, 0.8, 0.25, group);
   legR.position.set(0.2, 0.4, 0);
-  legR.castShadow = true;
-  group.add(legR);
+  legR.material = legMat;
+  state.shadowGen.addShadowCaster(legR);
 
   return { group, body };
 }
+
+// ── Player ────────────────────────────────────────────────
 
 export function createPlayer() {
   const { group, body } = createHumanoid({
@@ -78,12 +80,12 @@ export function createPlayer() {
     headColor: 0xffdbac,
     legColor: 0x1a3a5a,
   });
-
   state.playerMesh = body;
   group.position.set(0, 0, 0);
-  state.scene.add(group);
   return group;
 }
+
+// ── Bot ───────────────────────────────────────────────────
 
 export function createBot() {
   const { group, body } = createHumanoid({
@@ -92,202 +94,155 @@ export function createBot() {
     legColor: 0x5a1a1a,
   });
 
-  // Store bot materials for hit-flash effect
+  // Collect bot materials for hit-flash
   state.botBodyMaterials = [];
-  group.traverse((child) => {
-    if (child.isMesh && child.material) {
+  group.getChildMeshes().forEach((child) => {
+    if (child.material) {
       state.botBodyMaterials.push({
         mesh: child,
         mat: child.material,
-        origColor: child.material.color.clone(),
+        origColor: child.material.diffuseColor.clone(),
       });
     }
   });
 
   // Glowing red eyes
-  const eyeGeo = new THREE.SphereGeometry(0.05, 8, 8);
-  const eyeMat = new THREE.MeshStandardMaterial({
-    color: 0xff0000,
-    emissive: 0xff0000,
-    emissiveIntensity: 0.8,
-  });
-  const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
-  const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
+  const eyeMat = stdMat("eyeMat", 0xff0000, { emissiveHex: 0xff0000, spec: 0.0 });
+  const eyeL = BABYLON.MeshBuilder.CreateSphere(
+    "eyeL",
+    { diameter: 0.1, segments: 8 },
+    state.scene,
+  );
   eyeL.position.set(-0.08, 1.75, 0.2);
+  eyeL.material = eyeMat;
+  eyeL.parent = group;
+
+  const eyeR = BABYLON.MeshBuilder.CreateSphere(
+    "eyeR",
+    { diameter: 0.1, segments: 8 },
+    state.scene,
+  );
   eyeR.position.set(0.08, 1.75, 0.2);
-  group.add(eyeL, eyeR);
+  eyeR.material = eyeMat;
+  eyeR.parent = group;
 
   // Gun in hand
   const botGun = createPistolModel({
     sightColor: 0xff0000,
-    sightEmissive: 0xff0000,
-    sightIntensity: 0.4,
+    sightEmissiveHex: 0xff0000,
   });
   botGun.position.set(0.5, 0.5, 0.3);
-  group.add(botGun);
+  botGun.parent = group;
 
   state.botGunRef = botGun;
   state.botMesh = body;
   group.position.set(8, 0, 8);
-  state.scene.add(group);
   return group;
 }
 
+// ── Pistol model ──────────────────────────────────────────
+
 export function createPistolModel({
   sightColor = 0xff4444,
-  sightEmissive = 0xff0000,
-  sightIntensity = 0.3,
+  sightEmissiveHex = 0xff0000,
 } = {}) {
-  const gunGroup = new THREE.Group();
+  const gunGroup = new BABYLON.TransformNode("pistol", state.scene);
 
-  const bodyGeo = new THREE.BoxGeometry(0.08, 0.12, 0.5);
-  const bodyMat = new THREE.MeshStandardMaterial({
-    color: 0x2a2a2a,
-    roughness: 0.6,
-    metalness: 0.5,
-  });
-  const body = new THREE.Mesh(bodyGeo, bodyMat);
-  body.position.z = -0.15;
-  body.castShadow = true;
-  gunGroup.add(body);
+  // Body — Z is positive = forward in Babylon camera space
+  const bodyMesh = box("gunBody", 0.08, 0.12, 0.5, gunGroup);
+  bodyMesh.position.z = 0.15;
+  bodyMesh.material = stdMat("gunBodyMat", 0x2a2a2a, { spec: 0.5, specPow: 64 });
 
-  const barrelGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 8);
-  const barrelMat = new THREE.MeshStandardMaterial({
-    color: 0x1a1a1a,
-    roughness: 0.4,
-    metalness: 0.7,
-  });
-  const barrel = new THREE.Mesh(barrelGeo, barrelMat);
-  barrel.position.set(0, 0.02, -0.45);
+  const barrel = BABYLON.MeshBuilder.CreateCylinder(
+    "barrel",
+    { diameterTop: 0.04, diameterBottom: 0.04, height: 0.3, tessellation: 8 },
+    state.scene,
+  );
   barrel.rotation.x = Math.PI / 2;
-  barrel.castShadow = true;
-  gunGroup.add(barrel);
+  barrel.position.set(0, 0.02, 0.45);
+  barrel.parent = gunGroup;
+  barrel.material = stdMat("barrelMat", 0x1a1a1a, { spec: 0.7, specPow: 128 });
 
-  const handleGeo = new THREE.BoxGeometry(0.06, 0.15, 0.08);
-  const handleMat = new THREE.MeshStandardMaterial({
-    color: 0x3a2a1a,
-    roughness: 0.8,
-    metalness: 0.2,
-  });
-  const handle = new THREE.Mesh(handleGeo, handleMat);
-  handle.position.set(0, -0.12, -0.05);
-  handle.castShadow = true;
-  gunGroup.add(handle);
+  const handle = box("handle", 0.06, 0.15, 0.08, gunGroup);
+  handle.position.set(0, -0.12, 0.05);
+  handle.material = stdMat("handleMat", 0x3a2a1a, { spec: 0.2, specPow: 8 });
 
-  const sightGeo = new THREE.BoxGeometry(0.015, 0.03, 0.015);
-  const sightMat = new THREE.MeshStandardMaterial({
-    color: sightColor,
-    emissive: sightEmissive,
-    emissiveIntensity: sightIntensity,
-  });
-  const sight = new THREE.Mesh(sightGeo, sightMat);
-  sight.position.set(0, 0.08, -0.35);
-  gunGroup.add(sight);
+  const sight = box("sight", 0.015, 0.03, 0.015, gunGroup);
+  sight.position.set(0, 0.08, 0.35);
+  sight.material = stdMat("sightMat", sightColor, { emissiveHex: sightEmissiveHex, spec: 0.0 });
 
   return gunGroup;
 }
+
+// ── First-person gun ──────────────────────────────────────
 
 export function createGun() {
   const gunGroup = createPistolModel();
-  gunGroup.position.set(0.25, -0.25, -0.4);
+  // Position in camera local space: +Z = forward, so 0.4 puts it in front
+  gunGroup.position.set(0.25, -0.25, 0.4);
   gunGroup.rotation.y = -0.1;
   return gunGroup;
 }
+
+// ── SMG (first-person) ────────────────────────────────────
 
 export function createSMG() {
-  const gunGroup = new THREE.Group();
+  const gunGroup = new BABYLON.TransformNode("smg", state.scene);
 
-  const bodyGeo = new THREE.BoxGeometry(0.1, 0.15, 0.7);
-  const bodyMat = new THREE.MeshStandardMaterial({
-    color: 0x1a1a1a,
-    roughness: 0.5,
-    metalness: 0.6,
-  });
-  const body = new THREE.Mesh(bodyGeo, bodyMat);
-  body.position.z = -0.2;
-  body.castShadow = true;
-  gunGroup.add(body);
+  const body = box("smgBody", 0.1, 0.15, 0.7, gunGroup);
+  body.position.z = 0.2;
+  body.material = stdMat("smgBodyMat", 0x1a1a1a, { spec: 0.6, specPow: 64 });
 
-  const barrelGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.4, 8);
-  const barrelMat = new THREE.MeshStandardMaterial({
-    color: 0x0a0a0a,
-    roughness: 0.3,
-    metalness: 0.8,
-  });
-  const barrel = new THREE.Mesh(barrelGeo, barrelMat);
-  barrel.position.set(0, 0.03, -0.55);
+  const barrel = BABYLON.MeshBuilder.CreateCylinder(
+    "smgBarrel",
+    { diameterTop: 0.05, diameterBottom: 0.05, height: 0.4, tessellation: 8 },
+    state.scene,
+  );
   barrel.rotation.x = Math.PI / 2;
-  barrel.castShadow = true;
-  gunGroup.add(barrel);
+  barrel.position.set(0, 0.03, 0.55);
+  barrel.parent = gunGroup;
+  barrel.material = stdMat("smgBarrelMat", 0x0a0a0a, { spec: 0.8, specPow: 128 });
 
-  const magGeo = new THREE.BoxGeometry(0.08, 0.25, 0.12);
-  const magMat = new THREE.MeshStandardMaterial({
-    color: 0x2a2a2a,
-    roughness: 0.7,
-    metalness: 0.4,
-  });
-  const mag = new THREE.Mesh(magGeo, magMat);
-  mag.position.set(0, -0.15, -0.1);
-  mag.castShadow = true;
-  gunGroup.add(mag);
+  const mag = box("smgMag", 0.08, 0.25, 0.12, gunGroup);
+  mag.position.set(0, -0.15, 0.1);
+  mag.material = stdMat("smgMagMat", 0x2a2a2a, { spec: 0.4, specPow: 32 });
 
-  const handleGeo = new THREE.BoxGeometry(0.07, 0.18, 0.1);
-  const handleMat = new THREE.MeshStandardMaterial({
-    color: 0x3a2a1a,
-    roughness: 0.8,
-    metalness: 0.2,
-  });
-  const handle = new THREE.Mesh(handleGeo, handleMat);
+  const handle = box("smgHandle", 0.07, 0.18, 0.1, gunGroup);
   handle.position.set(0, -0.2, 0);
-  handle.castShadow = true;
-  gunGroup.add(handle);
+  handle.material = stdMat("smgHandleMat", 0x3a2a1a, { spec: 0.2, specPow: 8 });
 
-  const sightGeo = new THREE.BoxGeometry(0.02, 0.04, 0.02);
-  const sightMat = new THREE.MeshStandardMaterial({
-    color: 0xffaa00,
-    emissive: 0xffaa00,
-    emissiveIntensity: 0.4,
-  });
-  const sight = new THREE.Mesh(sightGeo, sightMat);
-  sight.position.set(0, 0.1, -0.4);
-  gunGroup.add(sight);
+  const sight = box("smgSight", 0.02, 0.04, 0.02, gunGroup);
+  sight.position.set(0, 0.1, 0.4);
+  sight.material = stdMat("smgSightMat", 0xffaa00, { emissiveHex: 0xffaa00, spec: 0.0 });
 
-  gunGroup.position.set(0.25, -0.25, -0.4);
+  gunGroup.position.set(0.25, -0.25, 0.4);
   gunGroup.rotation.y = -0.1;
   return gunGroup;
 }
 
+// ── SMG world pickup ──────────────────────────────────────
+
 export function createSMGPickup() {
-  const group = new THREE.Group();
+  const group = new BABYLON.TransformNode("smgPickup", state.scene);
 
-  const bodyGeo = new THREE.BoxGeometry(0.15, 0.2, 0.9);
-  const bodyMat = new THREE.MeshStandardMaterial({
-    color: 0x1a1a1a,
-    roughness: 0.5,
-    metalness: 0.6,
-  });
-  const body = new THREE.Mesh(bodyGeo, bodyMat);
-  body.castShadow = true;
-  group.add(body);
+  const body = box("smgPickupBody", 0.15, 0.2, 0.9, group);
+  body.material = stdMat("smgPickupBodyMat", 0x1a1a1a, { spec: 0.6, specPow: 64 });
+  state.shadowGen.addShadowCaster(body);
 
-  const magGeo = new THREE.BoxGeometry(0.1, 0.3, 0.15);
-  const magMat = new THREE.MeshStandardMaterial({
-    color: 0x2a2a2a,
-    roughness: 0.7,
-    metalness: 0.4,
-  });
-  const mag = new THREE.Mesh(magGeo, magMat);
+  const mag = box("smgPickupMag", 0.1, 0.3, 0.15, group);
   mag.position.set(0, -0.2, 0.1);
-  mag.castShadow = true;
-  group.add(mag);
+  mag.material = stdMat("smgPickupMagMat", 0x2a2a2a, { spec: 0.4, specPow: 32 });
 
-  const glowGeo = new THREE.SphereGeometry(0.6, 16, 16);
-  const glowMat = new THREE.MeshBasicMaterial({
-    color: 0xffaa00,
-    transparent: true,
-    opacity: 0.2,
-  });
-  group.add(new THREE.Mesh(glowGeo, glowMat));
+  const glowMat = new BABYLON.StandardMaterial("smgGlowMat", state.scene);
+  glowMat.diffuseColor = c3(0xffaa00);
+  glowMat.alpha = 0.2;
+  const glow = BABYLON.MeshBuilder.CreateSphere(
+    "smgGlow",
+    { diameter: 1.2, segments: 16 },
+    state.scene,
+  );
+  glow.material = glowMat;
+  glow.parent = group;
 
   group.position.set(0, 1.2, 0);
   return group;

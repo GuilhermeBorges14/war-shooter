@@ -48,29 +48,32 @@ export function restartGame() {
   state.reloadTimer = 0;
   state.screenShake = 0;
 
-  // Reset gun to default
-  state.camera.remove(state.playerGun);
+  // Swap gun back to pistol
+  if (state.playerGun) {
+    state.playerGun.parent = null;
+    state.playerGun.dispose();
+  }
   state.playerGun = createGun();
-  state.camera.add(state.playerGun);
+  state.playerGun.parent = state.camera;
 
   // Remove old SMG pickup
   if (state.smgPickup) {
-    state.scene.remove(state.smgPickup);
+    state.smgPickup.dispose();
     state.smgPickup = null;
   }
 
-  // Clear bullets
-  state.bullets.forEach((b) => state.scene.remove(b.mesh));
-  state.botBullets.forEach((b) => state.scene.remove(b.mesh));
+  // Dispose all active bullets
+  state.bullets.forEach((b) => b.mesh.dispose());
+  state.botBullets.forEach((b) => b.mesh.dispose());
   state.bullets = [];
   state.botBullets = [];
 
-  // Clear old bullet drops and spawn fresh ones
-  state.bulletDrops.forEach((drop) => state.scene.remove(drop.mesh));
+  // Dispose old drops and spawn fresh set
+  state.bulletDrops.forEach((drop) => drop.mesh.dispose());
   state.bulletDrops = [];
   spawnBulletDrops(5);
 
-  // Reset positions
+  // Reset positions and rotations
   state.playerGroup.position.set(0, 0, 0);
   state.botGroup.position.set(8, 0, 8);
   state.playerGroup.rotation.y = 0;
@@ -83,19 +86,14 @@ export function restartGame() {
   dom.botHealthFill.style.width = "100%";
   updateAmmoDisplay();
 
-  // Keep player name
   const savedName = localStorage.getItem("playerName");
-  if (dom.playerNameDisplay && savedName) {
-    dom.playerNameDisplay.textContent = savedName;
-  }
-  if (dom.playerHealthLabel && savedName) {
-    dom.playerHealthLabel.textContent = savedName + "'s Health";
-  }
+  if (dom.playerNameDisplay && savedName) dom.playerNameDisplay.textContent = savedName;
+  if (dom.playerHealthLabel && savedName) dom.playerHealthLabel.textContent = savedName + "'s Health";
 
   dom.message.style.display = "none";
   dom.restartBtn.style.display = "none";
 
-  state.renderer.domElement.requestPointerLock();
+  state.engine.getRenderingCanvas().requestPointerLock();
 }
 
 export function handleStartGame() {
@@ -104,15 +102,14 @@ export function handleStartGame() {
   localStorage.setItem("playerName", playerName);
 
   if (dom.playerNameDisplay) dom.playerNameDisplay.textContent = playerName;
-  if (dom.playerHealthLabel)
-    dom.playerHealthLabel.textContent = playerName + "'s Health";
+  if (dom.playerHealthLabel) dom.playerHealthLabel.textContent = playerName + "'s Health";
   if (dom.startScreen) dom.startScreen.style.display = "none";
 
   state.gameStarted = true;
   state.gameStartTime = Date.now();
   state.smgSpawned = false;
 
-  state.renderer.domElement.requestPointerLock();
+  state.engine.getRenderingCanvas().requestPointerLock();
 }
 
 export function handleSMGConfirm() {
@@ -128,18 +125,21 @@ export function handleSMGConfirm() {
 
   state.botMoveSpeed = BOT_MOVE_SPEED * 1.25;
 
-  if (state.smgPickup) state.smgPickup.visible = false;
+  if (state.smgPickup) state.smgPickup.setEnabled(false);
   dom.smgPopup.style.display = "none";
 
-  state.camera.remove(state.playerGun);
+  if (state.playerGun) {
+    state.playerGun.parent = null;
+    state.playerGun.dispose();
+  }
   state.playerGun = createSMG();
-  state.camera.add(state.playerGun);
+  state.playerGun.parent = state.camera;
 
-  state.renderer.domElement.requestPointerLock();
+  state.engine.getRenderingCanvas().requestPointerLock();
 }
 
 export function handleSMGCancel() {
   state.dom.smgPopup.style.display = "none";
   state.smgPopupShown = false;
-  state.renderer.domElement.requestPointerLock();
+  state.engine.getRenderingCanvas().requestPointerLock();
 }
