@@ -47,6 +47,7 @@ export function init() {
     antialias: true,
     canvas: state.dom.canvas,
   });
+  state.renderer.setPixelRatio(window.devicePixelRatio);
   state.renderer.setSize(window.innerWidth, window.innerHeight);
   state.renderer.shadowMap.enabled = true;
   state.renderer.shadowMap.type = THREE.PCFSoftShadowMap;

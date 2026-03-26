@@ -25,7 +25,6 @@ export function createArena() {
   // Floor grid lines
   const gridMat = new THREE.LineBasicMaterial({
     color: 0xccccdd,
-    linewidth: 1,
   });
   const gridStep = 2;
   const gridPoints = [];

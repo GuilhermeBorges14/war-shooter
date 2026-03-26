@@ -28,11 +28,10 @@ import { DAMAGE, PLAYER_HEALTH, SMG_SPAWN_DELAY } from "../utils/constants.js";
 // ============================================================
 
 export function startLoop() {
-  requestAnimationFrame(tick);
+  state.renderer.setAnimationLoop(tick);
 }
 
 function tick() {
-  requestAnimationFrame(tick);
 
   let dt = state.clock.getDelta();
   if (dt > 0.1) dt = 0.016; // clamp to avoid spiral of death on tab-out
