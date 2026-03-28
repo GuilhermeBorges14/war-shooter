@@ -9,39 +9,52 @@ import { BULLET_RANGE, ARENA_SIZE } from "../utils/constants.js";
 
 // Reusable viewport for screen projection
 const _viewport = new BABYLON.Viewport(0, 0, 1, 1);
+// Cached up-vector for quaternion orientation
+const _yUp = new BABYLON.Vector3(0, 1, 0);
 
 export function shoot(fromPosition, direction, isPlayerBullet, bulletSpeed) {
   playShootSound();
 
   const dir = direction.clone().normalize();
-  const color = isPlayerBullet ? new BABYLON.Color3(0.267, 1.0, 0.267) : new BABYLON.Color3(1.0, 0.267, 0.267);
 
-  // Capsule body
-  const bulletMesh = BABYLON.MeshBuilder.CreateCapsule(
+  // Dark steel — near-black body, slightly lighter nose
+  const bodyColor = new BABYLON.Color3(0.16, 0.16, 0.16);
+  const noseColor = new BABYLON.Color3(0.26, 0.26, 0.26);
+  const specular  = new BABYLON.Color3(0.55, 0.55, 0.55);
+  const emissive  = new BABYLON.Color3(0.05, 0.05, 0.05);
+
+  // Cylindrical casing body
+  const bulletMesh = BABYLON.MeshBuilder.CreateCylinder(
     "bullet",
-    { radius: 0.03, height: 0.18, tessellation: 4, subdivisions: 2 },
+    { height: 0.16, diameter: 0.052, tessellation: 10 },
     state.scene,
   );
-  const bulletMat = new BABYLON.StandardMaterial("bulletMat", state.scene);
-  bulletMat.diffuseColor = color;
-  bulletMat.emissiveColor = color;
-  bulletMesh.material = bulletMat;
+  const bodyMat = new BABYLON.StandardMaterial("bulletMat", state.scene);
+  bodyMat.diffuseColor  = bodyColor;
+  bodyMat.emissiveColor = emissive;
+  bodyMat.specularColor = specular;
+  bodyMat.specularPower = 128;
+  bulletMesh.material = bodyMat;
   bulletMesh.position.copyFrom(fromPosition);
 
-  // Orient capsule along travel direction
+  // Orient along travel direction (+Y → forward)
   _orientAlongDir(bulletMesh, dir);
 
-  // Glow sphere (child of capsule — disposed together)
-  const glowMesh = BABYLON.MeshBuilder.CreateSphere(
-    "bulletGlow",
-    { diameter: 0.16, segments: 6 },
+  // Ogive nose cone — pointed tip at +Y (forward), base matches body diameter
+  const noseMesh = BABYLON.MeshBuilder.CreateCylinder(
+    "bulletNose",
+    { height: 0.09, diameterTop: 0.0, diameterBottom: 0.052, tessellation: 10 },
     state.scene,
   );
-  const glowMat = new BABYLON.StandardMaterial("glowMat", state.scene);
-  glowMat.diffuseColor = color;
-  glowMat.alpha = 0.4;
-  glowMesh.material = glowMat;
-  glowMesh.parent = bulletMesh;
+  const noseMat = new BABYLON.StandardMaterial("noseMat", state.scene);
+  noseMat.diffuseColor  = noseColor;
+  noseMat.emissiveColor = emissive;
+  noseMat.specularColor = specular;
+  noseMat.specularPower = 96;
+  noseMesh.material = noseMat;
+  // Sit flush on top of the body (+Y face)
+  noseMesh.position.y = 0.16 / 2 + 0.09 / 2;
+  noseMesh.parent = bulletMesh;
 
   const data = {
     mesh: bulletMesh,
@@ -54,11 +67,17 @@ export function shoot(fromPosition, direction, isPlayerBullet, bulletSpeed) {
   else state.botBullets.push(data);
 }
 
-// Orient a mesh so its local +Y axis points along dir
+// Orient a mesh so its local +Y axis points along dir (quaternion — works for all angles)
 function _orientAlongDir(mesh, dir) {
-  const yaw = Math.atan2(dir.x, dir.z);
-  const pitch = -Math.asin(BABYLON.Scalar.Clamp(dir.y, -1, 1));
-  mesh.rotation.set(pitch, yaw, 0);
+  const dot = BABYLON.Vector3.Dot(_yUp, dir);
+  if (dot > 0.9999) {
+    mesh.rotationQuaternion = BABYLON.Quaternion.Identity();
+  } else if (dot < -0.9999) {
+    mesh.rotationQuaternion = BABYLON.Quaternion.RotationAxis(new BABYLON.Vector3(1, 0, 0), Math.PI);
+  } else {
+    const axis = BABYLON.Vector3.Cross(_yUp, dir).normalize();
+    mesh.rotationQuaternion = BABYLON.Quaternion.RotationAxis(axis, Math.acos(BABYLON.Scalar.Clamp(dot, -1, 1)));
+  }
 }
 
 // AABB point-in-box test (Babylon.js replaces Box3.containsPoint)
@@ -84,7 +103,6 @@ export function updateBulletList(list, targetGroup, hitRadius, onHit, dt) {
     b.mesh.position.x += b.velocity.x * dt;
     b.mesh.position.y += b.velocity.y * dt;
     b.mesh.position.z += b.velocity.z * dt;
-    _orientAlongDir(b.mesh, b.velocity);
     b.life -= dt;
 
     const p = b.mesh.position;
@@ -142,10 +160,9 @@ export function showHitmarker(worldPosition) {
     transition: opacity 0.3s ease;
   `;
   hitmarker.innerHTML = `
-    <svg width="40" height="40" viewBox="0 0 40 40" style="filter: drop-shadow(0 0 4px rgba(220,38,38,0.8));">
-      <line x1="8"  y1="8"  x2="32" y2="32" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/>
-      <line x1="32" y1="8"  x2="8"  y2="32" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/>
-      <circle cx="20" cy="20" r="3" fill="#dc2626" opacity="0.6"/>
+    <svg width="36" height="36" viewBox="0 0 36 36" style="filter: drop-shadow(0 0 5px rgba(158,221,32,0.9));">
+      <line x1="6"  y1="6"  x2="30" y2="30" stroke="#9edd20" stroke-width="2.5" stroke-linecap="square"/>
+      <line x1="30" y1="6"  x2="6"  y2="30" stroke="#9edd20" stroke-width="2.5" stroke-linecap="square"/>
     </svg>
   `;
   document.body.appendChild(hitmarker);

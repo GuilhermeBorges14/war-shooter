@@ -55,6 +55,7 @@ export function restartGame() {
   }
   state.playerGun = createGun();
   state.playerGun.parent = state.camera;
+  state.playerMuzzle = state.playerGun.getChildTransformNodes().find(n => n.name === "muzzle");
 
   // Remove old SMG pickup
   if (state.smgPickup) {
@@ -134,6 +135,7 @@ export function handleSMGConfirm() {
   }
   state.playerGun = createSMG();
   state.playerGun.parent = state.camera;
+  state.playerMuzzle = state.playerGun.getChildTransformNodes().find(n => n.name === "muzzle");
 
   state.engine.getRenderingCanvas().requestPointerLock();
 }

@@ -171,6 +171,11 @@ export function createPistolModel({
   sight.position.set(0, 0.08, 0.35);
   sight.material = stdMat("sightMat", sightColor, { emissiveHex: sightEmissiveHex, spec: 0.0 });
 
+  // Muzzle marker at barrel tip (barrel z=0.45, half-height=0.15 → tip at z=0.60)
+  const muzzle = new BABYLON.TransformNode("muzzle", state.scene);
+  muzzle.position.set(0, 0.02, 0.60);
+  muzzle.parent = gunGroup;
+
   return gunGroup;
 }
 
@@ -214,6 +219,11 @@ export function createSMG() {
   const sight = box("smgSight", 0.02, 0.04, 0.02, gunGroup);
   sight.position.set(0, 0.1, 0.4);
   sight.material = stdMat("smgSightMat", 0xffaa00, { emissiveHex: 0xffaa00, spec: 0.0 });
+
+  // Muzzle marker at barrel tip (barrel z=0.55, half-height=0.20 → tip at z=0.75)
+  const muzzle = new BABYLON.TransformNode("muzzle", state.scene);
+  muzzle.position.set(0, 0.03, 0.75);
+  muzzle.parent = gunGroup;
 
   gunGroup.position.set(0.25, -0.25, 0.4);
   gunGroup.rotation.y = -0.1;

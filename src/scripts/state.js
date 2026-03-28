@@ -23,6 +23,7 @@ export const state = {
   botMesh: null,
   botGunRef: null,
   playerGun: null,
+  playerMuzzle: null,
 
   // Game state
   playerHealth: PLAYER_HEALTH,

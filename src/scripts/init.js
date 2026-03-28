@@ -87,6 +87,7 @@ export function init() {
   // Attach first-person gun to camera
   state.playerGun = createGun();
   state.playerGun.parent = state.camera;
+  state.playerMuzzle = state.playerGun.getChildTransformNodes().find(n => n.name === "muzzle");
 
   // Load saved player name
   const savedName = localStorage.getItem("playerName");

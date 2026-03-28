@@ -17,6 +17,26 @@ import {
 } from "../utils/constants.js";
 
 // ============================================================
+// Helpers
+// ============================================================
+
+// Compute bullet spawn at the gun muzzle and horizontal-only travel direction.
+function _barrelShot() {
+  // Muzzle world position from the actual gun barrel tip
+  const origin = state.playerMuzzle.getAbsolutePosition().clone();
+
+  // Camera forward in world space, then flattened to horizontal
+  const fwd = BABYLON.Vector3.TransformNormal(
+    new BABYLON.Vector3(0, 0, 1),
+    state.camera.getWorldMatrix(),
+  );
+  fwd.y = 0;
+  fwd.normalize();
+
+  return { origin, dir: fwd };
+}
+
+// ============================================================
 // Event handlers
 // ============================================================
 
@@ -33,43 +53,20 @@ export function handleMouseDown(e) {
     return;
   }
 
-  // Camera world position = camera.position (camera is not a child of another node)
-  const pos = state.camera.position.clone();
-
-  // Camera forward in world space: transform local +Z by camera world matrix
-  // (camera.rotation.y = -yaw, camera.rotation.x = -pitch — see player.js)
-  const forward = BABYLON.Vector3.TransformNormal(
-    new BABYLON.Vector3(0, 0, 1),
-    state.camera.getWorldMatrix(),
-  );
-  forward.normalize();
-
-  // Offset origin slightly forward so bullets start in front of player
-  pos.x += forward.x * 0.6;
-  pos.y += forward.y * 0.6;
-  pos.z += forward.z * 0.6;
-
   if (state.hasSMG) {
     const bulletsToShoot = Math.min(3, state.playerBullets);
     for (let i = 0; i < bulletsToShoot; i++) {
       setTimeout(() => {
         if (!state.gameOver) {
-          const p2 = state.camera.position.clone();
-          const fwd2 = BABYLON.Vector3.TransformNormal(
-            new BABYLON.Vector3(0, 0, 1),
-            state.camera.getWorldMatrix(),
-          );
-          fwd2.normalize();
-          p2.x += fwd2.x * 0.6;
-          p2.y += fwd2.y * 0.6;
-          p2.z += fwd2.z * 0.6;
-          shoot(p2, fwd2, true, BULLET_SPEED);
+          const { origin, dir } = _barrelShot();
+          shoot(origin, dir, true, BULLET_SPEED);
         }
       }, i * 100);
     }
     state.playerBullets -= bulletsToShoot;
   } else {
-    shoot(pos, forward, true, BULLET_SPEED);
+    const { origin, dir } = _barrelShot();
+    shoot(origin, dir, true, BULLET_SPEED);
     state.playerBullets--;
   }
 
