@@ -7,7 +7,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  padding: 1.5rem 2rem;
+  padding: 1.4rem 1.8rem;
   pointer-events: none;
   display: flex;
   justify-content: space-between;
@@ -15,100 +15,189 @@
   gap: 2rem;
 }
 
+.ui-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ---- Health panel cards ---- */
+
 .health-container {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 0.75rem 1.25rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  min-width: 220px;
+  background: var(--panel-bg);
+  padding: 0.65rem 1.1rem 0.7rem;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--border-bright);
+  box-shadow:
+    0 0 20px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(0, 0, 0, 0.3);
+  min-width: 210px;
+  position: relative;
+}
+
+/* Top-right corner ornament on health panels */
+.health-container::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-top: 1px solid var(--border-bright);
+  border-right: 1px solid var(--border-bright);
+  pointer-events: none;
 }
 
 .health-label {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  color: var(--text-dim);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #718096;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.45rem;
 }
 
+/* Segmented health bar track */
 #health-bar,
 #bot-health-bar {
   width: 100%;
-  height: 14px;
-  background: #e2e8f0;
-  border-radius: 7px;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--border);
   overflow: hidden;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Segment dividers drawn over the fill */
+#health-bar::after,
+#bot-health-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0,
+    transparent calc(10% - 1px),
+    rgba(0, 0, 0, 0.55) calc(10% - 1px),
+    rgba(0, 0, 0, 0.55) 10%
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
 #health-fill {
   height: 100%;
   width: 100%;
-  background: linear-gradient(90deg, #48bb78, #38a169);
+  background: linear-gradient(90deg, #6ab820, #9edd20);
   transition: width 0.3s ease;
-  border-radius: 7px;
 }
 
 #bot-health-fill {
   height: 100%;
   width: 100%;
-  background: linear-gradient(90deg, #f56565, #e53e3e);
+  background: linear-gradient(90deg, #a01008, #e01810);
   transition: width 0.3s ease;
-  border-radius: 7px;
 }
+
+/* ---- Player name badge ---- */
 
 #player-name-display {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  font-size: 0.9rem;
+  background: var(--panel-bg);
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--acid-dim);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
   font-weight: 600;
-  color: #2d3748;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.14em;
+  color: var(--acid);
+  text-transform: uppercase;
 }
 
-/* ---- Ammo counter ---- */
+/* ---- Kill counter (top-center) ---- */
+
+#kill-counter {
+  position: absolute;
+  top: 1.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel-bg);
+  padding: 0.35rem 1rem;
+  border: 1px solid var(--border);
+  border-bottom: 2px solid var(--amber);
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--amber);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(232, 144, 0, 0.08);
+}
+
+#kill-counter .kill-icon {
+  margin-right: 0.5rem;
+  font-size: 0.65rem;
+}
+
+/* ---- Ammo counter (bottom-left) ---- */
 
 #ammo-counter {
   position: absolute;
   bottom: 2rem;
   left: 2rem;
-  background: rgba(0, 0, 0, 0.8);
-  padding: 1rem 1.5rem;
-  border-radius: 10px;
-  border: 2px solid rgba(220, 38, 38, 0.6);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  background: var(--panel-bg);
+  padding: 0.8rem 1.2rem;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--danger);
+  box-shadow:
+    0 0 20px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(0, 0, 0, 0.3);
   pointer-events: none;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #f1f5f9;
-  letter-spacing: 0.05em;
+  min-width: 120px;
   transition: transform 0.1s ease;
-  min-width: 130px;
 }
 
 #ammo-counter.shake {
   animation: shake 0.3s ease;
 }
 
-#ammo-counter .ammo-icon {
-  display: inline-block;
-  margin-right: 0.5rem;
-  color: #fbbf24;
+.ammo-label {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.25em;
+  color: var(--text-dim);
+  margin-bottom: 0.3rem;
 }
 
-/* ---- Reload bar (inside ammo counter) ---- */
+.ammo-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ammo-icon {
+  color: var(--acid);
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+#ammo-count {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-bright);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* ---- Reload bar ---- */
 
 #reload-bar {
   width: 100%;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 3px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.08);
   margin-top: 0.5rem;
   display: none;
   overflow: hidden;
@@ -120,114 +209,92 @@
 
 #reload-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #fbbf24, #f59e0b);
-  border-radius: 3px;
+  background: var(--amber);
   width: 0%;
+  box-shadow: 0 0 6px var(--amber-dim);
 }
 
 #reload-text {
-  font-size: 0.65rem;
-  color: #fbbf24;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  color: var(--amber);
   text-align: center;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: 0.2em;
   margin-top: 0.3rem;
   display: none;
+  animation: blink 0.7s ease infinite;
 }
 
 #reload-text.show {
   display: block;
 }
 
-/* ---- Kill counter ---- */
-
-#kill-counter {
-  position: absolute;
-  top: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.7);
-  padding: 0.4rem 1rem;
-  border-radius: 8px;
-  border: 1px solid rgba(251, 191, 36, 0.4);
-  pointer-events: none;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #fbbf24;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-#kill-counter .kill-icon {
-  margin-right: 0.4rem;
-}
-
-/* ---- Sprint indicator (crosshair color changes) ---- */
+/* ---- Crosshair ---- */
 
 #crosshair {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   pointer-events: none;
   transition: transform 0.1s ease;
 }
 
 #crosshair.sprinting {
-  transform: translate(-50%, -50%) scale(1.15);
+  transform: translate(-50%, -50%) scale(1.25);
 }
 
 #crosshair::before,
 #crosshair::after {
-  content: "";
+  content: '';
   position: absolute;
-  background: rgba(0, 0, 0, 0.8);
-  box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
-  transition: background 0.15s ease;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
 #crosshair.sprinting::before,
 #crosshair.sprinting::after {
-  background: rgba(100, 200, 255, 0.9);
-  box-shadow: 0 0 6px rgba(100, 200, 255, 0.6);
+  background: var(--acid);
+  box-shadow: 0 0 8px var(--acid-dim);
 }
 
 #crosshair::before {
-  width: 2px;
-  height: 14px;
+  width: 1px;
+  height: 10px;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
 }
 
 #crosshair::after {
-  width: 14px;
-  height: 2px;
+  width: 10px;
+  height: 1px;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
 }
 
-/* ---- Ammo messages ---- */
+/* ---- Ammo state messages ---- */
 
 #no-ammo-message {
   position: absolute;
-  bottom: 7rem;
+  bottom: 7.5rem;
   left: 2rem;
-  background: rgba(220, 38, 38, 0.9);
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  background: var(--panel-bg);
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--danger);
+  border-left: 2px solid var(--danger-bright);
   pointer-events: none;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.05em;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  color: var(--danger-bright);
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
+  box-shadow: 0 0 16px rgba(224, 24, 16, 0.2);
 }
 
 #no-ammo-message.show {
@@ -236,20 +303,20 @@
 
 #full-ammo-message {
   position: absolute;
-  bottom: 10.5rem;
+  bottom: 10rem;
   left: 2rem;
-  background: rgba(251, 191, 36, 0.9);
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  background: var(--panel-bg);
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--border-bright);
+  border-left: 2px solid var(--acid);
   pointer-events: none;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.05em;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  color: var(--acid);
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
+  box-shadow: 0 0 16px rgba(158, 221, 32, 0.12);
 }
 
 #full-ammo-message.show {
@@ -260,28 +327,34 @@
 
 #message {
   position: absolute;
-  top: 45%;
+  top: 42%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 3rem;
-  font-weight: 700;
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  font-weight: 900;
+  letter-spacing: 0.15em;
   pointer-events: none;
   display: none;
-  padding: 1.5rem 3rem;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  padding: 1.4rem 3rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-bright);
   text-align: center;
-  margin-bottom: 2rem;
+  box-shadow:
+    0 0 60px rgba(0, 0, 0, 0.8),
+    0 0 40px rgba(158, 221, 32, 0.06);
 }
 
 #message.win {
-  color: #38a169;
+  color: var(--acid-bright);
+  border-left: 3px solid var(--acid-bright);
+  text-shadow: 0 0 30px rgba(158, 221, 32, 0.5);
 }
 
 #message.lose {
-  color: #e53e3e;
+  color: var(--danger-bright);
+  border-left: 3px solid var(--danger-bright);
+  text-shadow: 0 0 30px rgba(224, 24, 16, 0.5);
 }
 
 /* ---- Restart button ---- */
@@ -292,26 +365,28 @@
   left: 50%;
   transform: translateX(-50%);
   pointer-events: auto;
-  padding: 0.75rem 2rem;
-  font-size: 1rem;
-  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-  border: 2px solid rgba(220, 38, 38, 0.5);
-  color: #fff;
-  border-radius: 10px;
+  padding: 0.8rem 2.4rem;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  background: transparent;
+  border: 1px solid var(--acid);
+  color: var(--acid);
   cursor: pointer;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-  transition: all 0.3s ease;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
   display: none;
   z-index: 100;
+  white-space: nowrap;
+  box-shadow: 0 0 20px rgba(158, 221, 32, 0.08);
 }
 
 #restart-btn:hover {
-  transform: translate(-50%, -2px);
-  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: var(--acid);
+  color: var(--void);
+  box-shadow: 0 0 40px rgba(158, 221, 32, 0.4);
+  transform: translateX(-50%) translateY(-1px);
 }
 
 /* ---- Minimap ---- */
@@ -322,24 +397,26 @@
   right: 1.5rem;
   width: 180px;
   height: 180px;
-  background: rgba(0, 0, 0, 0.7);
-  border: 2px solid rgba(220, 38, 38, 0.6);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  background: rgba(2, 6, 2, 0.92);
+  border: 1px solid var(--border-bright);
+  border-bottom: 2px solid var(--border-bright);
+  box-shadow:
+    0 0 20px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(158, 221, 32, 0.04),
+    inset 0 0 20px rgba(0, 0, 0, 0.5);
   pointer-events: none;
 }
 
-/* ---- Screen damage vignette ---- */
+/* ---- Screen-damage vignette ---- */
 
 #damage-vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  border-radius: 0;
-  box-shadow: inset 0 0 0 0 rgba(220, 38, 38, 0);
-  transition: box-shadow 0.1s ease;
+  box-shadow: inset 0 0 0 0 rgba(224, 24, 16, 0);
+  transition: box-shadow 0.08s ease;
 }
 
 #damage-vignette.flash {
-  box-shadow: inset 0 0 80px 20px rgba(220, 38, 38, 0.5);
+  box-shadow: inset 0 0 90px 30px rgba(224, 24, 16, 0.45);
 }

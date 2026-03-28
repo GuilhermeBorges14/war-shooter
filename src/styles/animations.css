@@ -1,68 +1,122 @@
 /* ============================================================
-   Animations — @keyframes definitions
+   Animations — @keyframes
    ============================================================ */
 
+/* ---- HUD ammo shake ---- */
+
 @keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-5px);
-  }
-  75% {
-    transform: translateX(5px);
-  }
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  40%       { transform: translateX(6px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
 }
+
+/* ---- Notification fade out ---- */
 
 @keyframes fadeOut {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  70% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.05);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.95);
-  }
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  70%  { opacity: 1; transform: translate(-50%, -50%) scale(1.04); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.94); }
 }
+
+/* ---- Damage number float up ---- */
 
 @keyframes floatUp {
-  0% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  20% {
-    opacity: 1;
-    transform: translateY(-10px) scale(1.1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-50px) scale(0.8);
-  }
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  18%  { opacity: 1; transform: translateY(-12px) scale(1.12); }
+  100% { opacity: 0; transform: translateY(-52px) scale(0.78); }
 }
 
-@keyframes pulseGlow {
-  0%,
-  100% {
-    box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.8);
-  }
-}
+/* ---- Ammo bar hit flash ---- */
 
 @keyframes hitFlash {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.15; }
+}
+
+/* ---- Start screen panel boot-in ---- */
+
+@keyframes boot-in {
   0% {
-    opacity: 1;
+    opacity: 0;
+    transform: scaleY(0.06) scaleX(0.92);
+    filter: brightness(3);
   }
-  50% {
-    opacity: 0.2;
+  30% {
+    opacity: 1;
+    transform: scaleY(1.02) scaleX(0.98);
+    filter: brightness(1.4);
+  }
+  60% {
+    transform: scaleY(0.99) scaleX(1.01);
+    filter: brightness(1);
   }
   100% {
     opacity: 1;
+    transform: scaleY(1) scaleX(1);
+    filter: brightness(1);
   }
+}
+
+/* ---- Title glitch effect ---- */
+
+@keyframes title-glitch {
+  0%, 84%, 100% {
+    transform: translate(0);
+    text-shadow:
+      0 0 30px rgba(158, 221, 32, 0.45),
+      0 0 70px rgba(158, 221, 32, 0.12),
+      0 4px 24px rgba(0, 0, 0, 0.95);
+    filter: none;
+  }
+  85% {
+    transform: translate(-4px, 2px) skewX(-1deg);
+    text-shadow:
+      4px 0 rgba(224, 24, 16, 0.8),
+      -4px 0 rgba(158, 221, 32, 0.8);
+    filter: hue-rotate(20deg);
+  }
+  87% {
+    transform: translate(4px, -1px) skewX(1deg);
+    text-shadow:
+      -4px 0 rgba(224, 24, 16, 0.8),
+      4px 0 rgba(158, 221, 32, 0.8);
+    filter: hue-rotate(-20deg);
+  }
+  89% {
+    transform: translate(-2px, 0);
+    text-shadow:
+      0 0 30px rgba(158, 221, 32, 0.6),
+      0 0 80px rgba(158, 221, 32, 0.2);
+    filter: none;
+  }
+  90% {
+    transform: translate(0);
+    text-shadow:
+      0 0 30px rgba(158, 221, 32, 0.45),
+      0 0 70px rgba(158, 221, 32, 0.12),
+      0 4px 24px rgba(0, 0, 0, 0.95);
+    filter: none;
+  }
+}
+
+/* ---- Corner reticle pulse ---- */
+
+@keyframes reticle-pulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+/* ---- Blinking cursor / reload text ---- */
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 }

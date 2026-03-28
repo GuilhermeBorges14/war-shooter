@@ -43,7 +43,7 @@ export function updateAmmoDisplay() {
   } else if (state.playerBullets <= 5) {
     dom.ammoCount.style.color = "#f59e0b";
   } else {
-    dom.ammoCount.style.color = "#f1f5f9";
+    dom.ammoCount.style.color = "#ccee90";
   }
 }
 
@@ -100,14 +100,14 @@ export function drawMinimap() {
   const size = 180;
   const scale = size / ARENA_SIZE;
 
-  ctx.fillStyle = "rgba(10, 15, 20, 0.95)";
+  ctx.fillStyle = "rgba(2, 6, 2, 0.96)";
   ctx.fillRect(0, 0, size, size);
 
-  ctx.strokeStyle = "rgba(100, 100, 120, 0.6)";
+  ctx.strokeStyle = "rgba(82, 122, 58, 0.7)";
   ctx.lineWidth = 1;
   ctx.strokeRect(0, 0, size, size);
 
-  ctx.strokeStyle = "rgba(60, 60, 80, 0.3)";
+  ctx.strokeStyle = "rgba(46, 70, 40, 0.4)";
   ctx.lineWidth = 0.5;
   const gridStep = 2 * scale;
   for (let i = gridStep; i < size; i += gridStep) {
@@ -122,7 +122,7 @@ export function drawMinimap() {
   }
 
   // Crates
-  ctx.fillStyle = "rgba(150, 150, 160, 0.5)";
+  ctx.fillStyle = "rgba(90, 110, 70, 0.55)";
   for (const crate of state.crates) {
     const x = (crate.position.x + ARENA_SIZE / 2) * scale;
     const z = (crate.position.z + ARENA_SIZE / 2) * scale;
@@ -131,8 +131,8 @@ export function drawMinimap() {
   }
 
   // Bullet drops
-  ctx.fillStyle = "#fbbf24";
-  ctx.strokeStyle = "#f59e0b";
+  ctx.fillStyle = "#e89000";
+  ctx.strokeStyle = "#c87800";
   ctx.lineWidth = 1;
   for (const drop of state.bulletDrops) {
     const x = (drop.mesh.position.x + ARENA_SIZE / 2) * scale;
@@ -146,11 +146,11 @@ export function drawMinimap() {
   // Bot
   const botX = (state.botGroup.position.x + ARENA_SIZE / 2) * scale;
   const botZ = (state.botGroup.position.z + ARENA_SIZE / 2) * scale;
-  ctx.fillStyle = "#dc2626";
+  ctx.fillStyle = "#e01810";
   ctx.beginPath();
   ctx.arc(botX, botZ, 5, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = "#dc2626";
+  ctx.strokeStyle = "#e01810";
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(botX, botZ);
@@ -163,11 +163,11 @@ export function drawMinimap() {
   // Player
   const px = (state.playerGroup.position.x + ARENA_SIZE / 2) * scale;
   const pz = (state.playerGroup.position.z + ARENA_SIZE / 2) * scale;
-  ctx.fillStyle = "#48bb78";
+  ctx.fillStyle = "#9edd20";
   ctx.beginPath();
   ctx.arc(px, pz, 5, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = "#48bb78";
+  ctx.strokeStyle = "#9edd20";
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(px, pz);

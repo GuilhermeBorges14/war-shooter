@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>War Shooter — 3D FPS</title>
+    <title>WAR SHOOTER — COMBAT ARENA</title>
     <link rel="stylesheet" href="src/styles/base.css" />
     <link rel="stylesheet" href="src/styles/hud.css" />
     <link rel="stylesheet" href="src/styles/screens.css" />
@@ -16,22 +16,22 @@
 
       <!-- HUD: health bars + player name -->
       <div id="ui">
-        <div>
+        <div class="ui-left">
           <div id="player-name-display"></div>
           <div class="health-container">
-            <div class="health-label" id="player-health-label">Your Health</div>
+            <div class="health-label" id="player-health-label">OPERATOR</div>
             <div id="health-bar"><div id="health-fill"></div></div>
           </div>
         </div>
         <div class="health-container">
-          <div class="health-label">Enemy Health</div>
+          <div class="health-label">HOSTILE</div>
           <div id="bot-health-bar"><div id="bot-health-fill"></div></div>
         </div>
       </div>
 
       <!-- Kill counter (top-center) -->
       <div id="kill-counter">
-        <span class="kill-icon">💀</span>KILLS: <span id="kill-count">0</span>
+        <span class="kill-icon">▲</span>KILLS <span id="kill-count">0</span>
       </div>
 
       <!-- Crosshair -->
@@ -39,38 +39,43 @@
 
       <!-- Ammo counter + reload bar (bottom-left) -->
       <div id="ammo-counter">
-        <span class="ammo-icon">🔫</span><span id="ammo-count">7</span>
+        <div class="ammo-label">AMMO</div>
+        <div class="ammo-display">
+          <span class="ammo-icon">◉</span><span id="ammo-count">7</span>
+        </div>
         <div id="reload-bar"><div id="reload-bar-fill"></div></div>
         <div id="reload-text">RELOADING</div>
       </div>
 
       <!-- Ammo state messages -->
-      <div id="no-ammo-message">NO AMMO!</div>
-      <div id="full-ammo-message">AMMO FULL!</div>
+      <div id="no-ammo-message">NO AMMO</div>
+      <div id="full-ammo-message">AMMO FULL</div>
 
       <!-- Win/Lose message -->
       <div id="message"></div>
-      <button id="restart-btn">Play Again</button>
+      <button id="restart-btn">RETRY MISSION</button>
 
       <!-- Screen-damage vignette overlay -->
       <div id="damage-vignette"></div>
 
       <!-- SMG upgrade popup -->
       <div id="smg-popup">
-        <h2>🔫 SUBMACHINE GUN</h2>
+        <div class="popup-tag">// WEAPON UPGRADE //</div>
+        <h2>SUBMACHINE GUN</h2>
+        <div class="popup-divider"></div>
         <p>
-          <strong>This will upgrade your weapon!</strong><br />
-          • 40 bullets granted<br />
-          • Shoots 3 bullets per click<br />
-          • Ammo drops give 10 bullets<br />
-          • Enemy health restored and increased 3×<br />
-          • Enemy speed increased by 25%<br />
-          <br />
-          Accept the challenge?
+          <strong>UPGRADE PARAMETERS:</strong><br />
+          <span class="popup-stat">+ 40 rounds granted</span><br />
+          <span class="popup-stat">+ 3 rounds per trigger pull</span><br />
+          <span class="popup-stat">+ Ammo drops: +10 rounds</span><br />
+          <span class="popup-stat danger">! Hostile HP increased ×3</span><br />
+          <span class="popup-stat danger">! Hostile speed +25%</span>
         </p>
+        <div class="popup-divider"></div>
+        <p class="popup-confirm-text">Accept the challenge?</p>
         <div class="buttons">
-          <button id="smg-confirm">Accept</button>
-          <button id="smg-cancel">Decline</button>
+          <button id="smg-confirm">ACCEPT</button>
+          <button id="smg-cancel">DECLINE</button>
         </div>
       </div>
 
@@ -79,23 +84,36 @@
 
       <!-- Start screen -->
       <div id="start-screen">
-        <h1>🪖 WAR SHOOTER</h1>
-        <p class="subtitle">First-Person Combat Arena</p>
-        <input
-          type="text"
-          id="player-name-input"
-          placeholder="Player"
-          value="Player"
-          maxlength="20"
-        />
-        <p>
-          <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> &nbsp; Move<br />
-          <kbd>Shift</kbd> &nbsp; Sprint<br />
-          <kbd>Mouse</kbd> &nbsp; Look Around<br />
-          <kbd>Right Click</kbd> &nbsp; Shoot<br />
-          <kbd>R</kbd> &nbsp; Reload
-        </p>
-        <button id="start-btn">Start Game</button>
+        <span class="reticle tl"></span>
+        <span class="reticle tr"></span>
+        <span class="reticle bl"></span>
+        <span class="reticle br"></span>
+
+        <div class="start-panel">
+          <div class="panel-tag top">// SYS-COMBAT-ARENA //</div>
+
+          <h1>WAR<br />SHOOTER</h1>
+          <p class="subtitle">FIRST-PERSON COMBAT ARENA</p>
+
+          <input
+            type="text"
+            id="player-name-input"
+            placeholder="CALLSIGN"
+            value="Player"
+            maxlength="20"
+          />
+
+          <div class="controls">
+            <div class="ctrl"><kbd>WASD</kbd><span>MOVE</span></div>
+            <div class="ctrl"><kbd>SHIFT</kbd><span>SPRINT</span></div>
+            <div class="ctrl"><kbd>MOUSE</kbd><span>AIM</span></div>
+            <div class="ctrl"><kbd>RMB</kbd><span>FIRE</span></div>
+            <div class="ctrl"><kbd>R</kbd><span>RELOAD</span></div>
+          </div>
+
+          <button id="start-btn">DEPLOY</button>
+          <div class="panel-tag bottom">AUTHORIZED PERSONNEL ONLY</div>
+        </div>
       </div>
     </div>
 

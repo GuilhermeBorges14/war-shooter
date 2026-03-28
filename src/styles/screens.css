@@ -2,125 +2,262 @@
    Screens — start screen, game-over overlays
    ============================================================ */
 
+/* ---- Full-screen backdrop ---- */
+
 #start-screen {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(
-      135deg,
-      rgba(15, 18, 20, 0.96) 0%,
-      rgba(26, 29, 33, 0.96) 100%
+    radial-gradient(ellipse 70% 80% at 30% 50%, rgba(28, 45, 14, 0.35) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 70% at 72% 45%, rgba(12, 22, 6, 0.25) 0%, transparent 65%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 39px,
+      rgba(158, 221, 32, 0.025) 39px,
+      rgba(158, 221, 32, 0.025) 40px
     ),
     repeating-linear-gradient(
-      45deg,
+      90deg,
       transparent,
-      transparent 10px,
-      rgba(255, 255, 255, 0.02) 10px,
-      rgba(255, 255, 255, 0.02) 20px
-    );
-  backdrop-filter: blur(10px);
+      transparent 39px,
+      rgba(158, 221, 32, 0.025) 39px,
+      rgba(158, 221, 32, 0.025) 40px
+    ),
+    var(--void);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
   z-index: 10;
-  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-#start-screen h1 {
-  font-size: 3.5rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  color: #f1f5f9;
-  text-shadow:
-    0 0 20px rgba(220, 38, 38, 0.5),
-    0 4px 12px rgba(0, 0, 0, 0.8),
-    0 0 40px rgba(220, 38, 38, 0.3);
-  margin-bottom: 0.5rem;
+/* ---- Corner reticles (four screen corners) ---- */
+
+.reticle {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  animation: reticle-pulse 3.6s ease-in-out infinite;
 }
 
-#start-screen .subtitle {
-  font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 1rem;
+.reticle.tl {
+  top: 22px;
+  left: 22px;
+  border-top: 2px solid var(--acid);
+  border-left: 2px solid var(--acid);
+}
+.reticle.tr {
+  top: 22px;
+  right: 22px;
+  border-top: 2px solid var(--acid);
+  border-right: 2px solid var(--acid);
+  animation-delay: 0.9s;
+}
+.reticle.bl {
+  bottom: 22px;
+  left: 22px;
+  border-bottom: 2px solid var(--acid);
+  border-left: 2px solid var(--acid);
+  animation-delay: 1.8s;
+}
+.reticle.br {
+  bottom: 22px;
+  right: 22px;
+  border-bottom: 2px solid var(--acid);
+  border-right: 2px solid var(--acid);
+  animation-delay: 2.7s;
 }
 
-#start-screen p {
-  color: rgba(255, 255, 255, 0.95);
-  max-width: 400px;
+/* ---- Central panel ---- */
+
+.start-panel {
+  position: relative;
+  width: min(480px, 88vw);
+  padding: 2.8rem 3.2rem 2.4rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-bright);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4rem;
+  box-shadow:
+    0 0 60px rgba(158, 221, 32, 0.07),
+    0 0 120px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(158, 221, 32, 0.08),
+    inset 0 0 60px rgba(0, 0, 0, 0.4);
+  animation: boot-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Top-left and bottom-right corner bracket ornaments */
+.start-panel::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 22px;
+  height: 22px;
+  border-top: 2px solid var(--acid-bright);
+  border-left: 2px solid var(--acid-bright);
+  pointer-events: none;
+}
+.start-panel::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 22px;
+  height: 22px;
+  border-bottom: 2px solid var(--acid-bright);
+  border-right: 2px solid var(--acid-bright);
+  pointer-events: none;
+}
+
+/* ---- Panel classification tags ---- */
+
+.panel-tag {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  color: var(--text-dim);
   text-align: center;
-  line-height: 2.5;
-  font-size: 1rem;
+  width: 100%;
 }
 
-#start-screen kbd {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 0.4rem 0.7rem;
-  border-radius: 6px;
-  font-family: "SF Mono", "Monaco", "Consolas", monospace;
-  font-size: 0.9rem;
-  margin: 0 0.2rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.panel-tag.top  { margin-bottom: -0.6rem; }
+.panel-tag.bottom { margin-top: -0.6rem; }
+
+/* ---- Title ---- */
+
+.start-panel h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 9vw, 4.8rem);
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  line-height: 0.88;
+  text-align: center;
+  color: var(--text-bright);
+  text-shadow:
+    0 0 30px rgba(158, 221, 32, 0.45),
+    0 0 70px rgba(158, 221, 32, 0.12),
+    0 4px 24px rgba(0, 0, 0, 0.95);
+  animation: title-glitch 9s ease-in-out infinite;
 }
+
+.start-panel .subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.28em;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: -0.6rem;
+}
+
+/* ---- Name / callsign input ---- */
 
 #player-name-input {
-  padding: 0.75rem 1.5rem;
+  width: 100%;
+  padding: 0.8rem 1.2rem;
+  font-family: var(--font-mono);
   font-size: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(220, 38, 38, 0.4);
-  color: #f1f5f9;
-  border-radius: 8px;
-  width: 280px;
-  text-align: center;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  letter-spacing: 0.18em;
+  background: rgba(158, 221, 32, 0.03);
+  border: 1px solid var(--border);
+  border-bottom: 2px solid var(--border-bright);
+  color: var(--text-bright);
   outline: none;
-  font-family: inherit;
+  text-align: center;
+  text-transform: uppercase;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, color 0.2s;
 }
 
 #player-name-input::placeholder {
-  color: rgba(241, 245, 249, 0.5);
+  color: var(--text-dim);
+  letter-spacing: 0.35em;
 }
 
 #player-name-input:focus {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(220, 38, 38, 0.8);
-  box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
+  background: rgba(158, 221, 32, 0.07);
+  border-bottom-color: var(--acid-bright);
+  color: var(--acid-bright);
+  box-shadow: 0 6px 24px rgba(158, 221, 32, 0.12);
 }
+
+/* ---- Controls grid ---- */
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem 2.5rem;
+  width: 100%;
+  padding: 0.2rem 0;
+}
+
+.ctrl {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.ctrl kbd {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  padding: 0.22rem 0.5rem;
+  background: rgba(158, 221, 32, 0.06);
+  border: 1px solid var(--border-bright);
+  color: var(--acid);
+  min-width: 54px;
+  text-align: center;
+  display: inline-block;
+  clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+}
+
+.ctrl span {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+/* ---- Deploy / start button ---- */
 
 #start-btn {
   pointer-events: auto;
-  padding: 1rem 3rem;
-  font-size: 1.2rem;
-  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-  border: 2px solid rgba(220, 38, 38, 0.6);
-  color: #fff;
-  border-radius: 12px;
-  cursor: pointer;
+  width: 100%;
+  padding: 1rem 2rem;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
   font-weight: 700;
-  box-shadow:
-    0 4px 16px rgba(220, 38, 38, 0.4),
-    0 0 30px rgba(220, 38, 38, 0.2);
-  transition: all 0.3s ease;
+  letter-spacing: 0.3em;
+  background: transparent;
+  border: 1px solid var(--acid);
+  color: var(--acid);
+  cursor: pointer;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow:
+    0 0 20px rgba(158, 221, 32, 0.08),
+    inset 0 0 24px rgba(158, 221, 32, 0.03);
 }
 
 #start-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow:
-    0 6px 24px rgba(220, 38, 38, 0.6),
-    0 0 40px rgba(220, 38, 38, 0.3);
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  border-color: rgba(239, 68, 68, 0.8);
+  background: var(--acid);
+  color: var(--void);
+  box-shadow: 0 0 40px rgba(158, 221, 32, 0.45), 0 0 80px rgba(158, 221, 32, 0.15);
+}
+
+#start-btn:active:not(:disabled) {
+  background: var(--acid-bright);
+  color: var(--void);
 }
 
 #start-btn:disabled {
-  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-  border-color: rgba(107, 114, 128, 0.4);
-  box-shadow: none;
+  border-color: var(--border);
+  color: var(--text-dim);
   cursor: not-allowed;
+  box-shadow: none;
   opacity: 0.5;
 }
